@@ -247,45 +247,70 @@ export interface Database {
         Row: Restaurant;
         Insert: RestaurantInsert;
         Update: RestaurantUpdate;
+        Relationships: [];
       };
       categories: {
         Row: Category;
         Insert: CategoryInsert;
         Update: CategoryUpdate;
+        Relationships: [
+          { foreignKeyName: "categories_restaurant_id_fkey"; columns: ["restaurant_id"]; isOneToOne: false; referencedRelation: "restaurants"; referencedColumns: ["id"] }
+        ];
       };
       menu_items: {
         Row: MenuItem;
         Insert: MenuItemInsert;
         Update: MenuItemUpdate;
+        Relationships: [
+          { foreignKeyName: "menu_items_restaurant_id_fkey"; columns: ["restaurant_id"]; isOneToOne: false; referencedRelation: "restaurants"; referencedColumns: ["id"] },
+          { foreignKeyName: "menu_items_category_id_fkey"; columns: ["category_id"]; isOneToOne: false; referencedRelation: "categories"; referencedColumns: ["id"] }
+        ];
       };
       tables: {
         Row: Table;
         Insert: TableInsert;
         Update: TableUpdate;
+        Relationships: [
+          { foreignKeyName: "tables_restaurant_id_fkey"; columns: ["restaurant_id"]; isOneToOne: false; referencedRelation: "restaurants"; referencedColumns: ["id"] }
+        ];
       };
       staff: {
         Row: Staff;
         Insert: StaffInsert;
         Update: StaffUpdate;
+        Relationships: [
+          { foreignKeyName: "staff_restaurant_id_fkey"; columns: ["restaurant_id"]; isOneToOne: false; referencedRelation: "restaurants"; referencedColumns: ["id"] }
+        ];
       };
       orders: {
         Row: Order;
         Insert: OrderInsert;
         Update: OrderUpdate;
+        Relationships: [
+          { foreignKeyName: "orders_restaurant_id_fkey"; columns: ["restaurant_id"]; isOneToOne: false; referencedRelation: "restaurants"; referencedColumns: ["id"] },
+          { foreignKeyName: "orders_table_id_fkey"; columns: ["table_id"]; isOneToOne: false; referencedRelation: "tables"; referencedColumns: ["id"] }
+        ];
       };
       order_items: {
         Row: OrderItem;
         Insert: OrderItemInsert;
         Update: OrderItemUpdate;
+        Relationships: [
+          { foreignKeyName: "order_items_order_id_fkey"; columns: ["order_id"]; isOneToOne: false; referencedRelation: "orders"; referencedColumns: ["id"] },
+          { foreignKeyName: "order_items_menu_item_id_fkey"; columns: ["menu_item_id"]; isOneToOne: false; referencedRelation: "menu_items"; referencedColumns: ["id"] }
+        ];
       };
       reservations: {
         Row: Reservation;
         Insert: ReservationInsert;
         Update: ReservationUpdate;
+        Relationships: [
+          { foreignKeyName: "reservations_restaurant_id_fkey"; columns: ["restaurant_id"]; isOneToOne: false; referencedRelation: "restaurants"; referencedColumns: ["id"] }
+        ];
       };
     };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Views: Record<string, { Row: Record<string, unknown>; Relationships: [] }>;
+    Functions: Record<string, { Args: Record<string, unknown>; Returns: unknown }>;
     Enums: {
       availability_status: AvailabilityStatus;
       order_status: OrderStatus;
