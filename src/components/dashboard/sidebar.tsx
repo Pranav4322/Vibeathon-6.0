@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Bot,
   LogOut,
+  Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -27,6 +28,7 @@ const navItems = [
   { name: "Reservations", href: "/dashboard/reservations", icon: Users },
   { name: "Inventory", href: "/dashboard/inventory", icon: Package },
   { name: "Staff", href: "/dashboard/staff", icon: UserSquare2 },
+  { name: "Billing", href: "/dashboard/billing", icon: Receipt },
   { name: "Customers", href: "/dashboard/customers", icon: Users },
   { name: "Sales", href: "/dashboard/sales", icon: BadgeDollarSign },
   { name: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
