@@ -73,7 +73,7 @@ export async function advanceOrderStatus(
 
   const { error: updateErr } = await supabase
     .from("orders")
-    .update(updatePayload)
+    .update(updatePayload as never)
     .eq("id", orderId);
 
   if (updateErr) {
@@ -103,10 +103,9 @@ export async function advanceOrderStatus(
 
       // If no other active orders, free the table
       if (!otherOrders || otherOrders.length === 0) {
-        // @ts-expect-error Supabase types are not fully generated yet
         await supabase
           .from("tables")
-          .update({ status: "free", occupied_since: null })
+          .update({ status: "free", occupied_since: null } as never)
           .eq("id", fullOrder.table_id);
       }
     }
@@ -125,10 +124,9 @@ export async function updateMenuAvailability(
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
 
-  // @ts-expect-error Supabase types are not fully generated yet
   const { error } = await supabase
     .from("menu_items")
-    .update({ availability_status: status })
+    .update({ availability_status: status } as never)
     .eq("id", menuItemId);
 
   if (error) {
