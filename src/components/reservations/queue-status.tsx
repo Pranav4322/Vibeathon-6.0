@@ -6,6 +6,7 @@ import { cancelReservation } from "@/lib/actions/reservation-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useNotifications } from "@/lib/hooks/use-notifications";
 
 interface QueueStatusProps {
   initialReservation: any;
@@ -17,6 +18,7 @@ export function QueueStatus({ initialReservation, restaurantId, onCancel }: Queu
   const [reservation, setReservation] = useState(initialReservation);
   const [partiesAhead, setPartiesAhead] = useState(0);
   const [loadingCancel, setLoadingCancel] = useState(false);
+  useNotifications({ restaurantId, reservationId: reservation.id });
   
   useEffect(() => {
     const supabase = createClient();

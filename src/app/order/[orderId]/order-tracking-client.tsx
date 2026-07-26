@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Utensils, Clock, CheckCircle2, ChefHat, Bell, Receipt } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Order, OrderStatus, Table } from "@/lib/types/database";
+import { useNotifications } from "@/lib/hooks/use-notifications";
 
 const STATUS_STEPS = [
   { key: "placed",    label: "Placed",     icon: Receipt,     color: "text-blue-500",   bg: "bg-blue-50"   },
@@ -29,6 +30,7 @@ interface OrderTrackingClientProps {
 
 export function OrderTrackingClient({ initialOrder, tableData, orderItems }: OrderTrackingClientProps) {
   const [order, setOrder] = useState<Order>(initialOrder);
+  useNotifications({ restaurantId: order.restaurant_id, orderId: order.id });
 
   useEffect(() => {
     const supabase = createClient();

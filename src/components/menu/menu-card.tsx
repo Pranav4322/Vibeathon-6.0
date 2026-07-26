@@ -7,6 +7,8 @@ import { QuantitySelector } from "./quantity-selector";
 import { useCart } from "@/lib/hooks/use-cart";
 import type { MenuItem } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 interface MenuCardProps {
   item: MenuItem;
@@ -18,6 +20,16 @@ export function MenuCard({ item }: MenuCardProps) {
   const quantity = cartEntry?.quantity ?? 0;
   const isOut = item.availability_status === "out";
   const isLow = item.availability_status === "low";
+
+  useEffect(() => {
+    if (quantity > 0 && isOut) {
+      toast.error(`${item.name} just went out of stock! It has been removed from your cart.`, { 
+        duration: 5000,
+        style: { background: "#ef4444", color: "#fff", borderColor: "#b91c1c" }
+      });
+      removeItem(item.id);
+    }
+  }, [isOut, quantity, item.name, item.id, removeItem]);
 
   return (
     <div
