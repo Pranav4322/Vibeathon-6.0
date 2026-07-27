@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 
 /* ── Demo route constants ─────────────────────────────────────── */
 const DEMO_MENU_HREF =
-  "/menu/a1b2c3d4-e5f6-7890-abcd-ef1234567890?table=3";
+  "/customer/login";
 
 /* ── Ticket data (mirrors the HTML file) ─────────────────────── */
 const TICKETS = [
