@@ -1,5 +1,8 @@
 # 🍽️ Smart Restaurant Management System
 
+**Team Name:** [Insert Team Name Here]
+**Hosted Application Link:** [Insert Hosted Link Here]
+
 A full-stack, real-time restaurant management platform that digitizes the in-restaurant experience end-to-end — from customer ordering to kitchen management, billing, and AI-powered operational insights.
 
 > **This is NOT a food delivery clone.** It's a system built for dine-in restaurant operations.
@@ -38,15 +41,21 @@ placed → confirmed → preparing → ready → served → billed
 | AI          | Google Gemini API (demand forecasting + ops assistant)                      |
 | Deployment  | Vercel                                                                     |
 
-## Hackathon Tier Features
+## AI Usage
 
-| Tier         | Features                                                        |
-| ------------ | --------------------------------------------------------------- |
-| **Bronze**   | Menu display, basic ordering, table management                  |
-| **Silver**   | Real-time order tracking, staff dashboard, role-based access     |
-| **Gold**     | Smart reservations, notifications, analytics, billing           |
-| **Platinum** | AI demand forecasting, realtime dish availability               |
-| **Bonus**    | Gemini ops assistant, wait-time alerts, bidirectional realtime   |
+This project leverages Google's Gemini AI to enhance restaurant operations:
+- **Demand Forecasting:** Predicts dish demand based on historical order data, helping the kitchen prep the right amounts and reduce waste.
+- **Ops Assistant:** A conversational agent for staff to query operational data in natural language (e.g., "What sold best last night?", "Which tables are running long?").
+
+## Hackathon Tier Features & User Stories
+
+| Tier         | Features                                                        | User Stories |
+| ------------ | --------------------------------------------------------------- | ------------ |
+| **Bronze**   | Menu display, basic ordering, table management                  | As a customer, I can view the digital menu and place an order. As staff, I can manage table statuses. |
+| **Silver**   | Real-time order tracking, staff dashboard, role-based access     | As a customer, I can track my order status live. As staff, I can manage orders through a kanban board. |
+| **Gold**     | Smart reservations, notifications, analytics, billing           | As a customer, I can join a waitlist and get notified when my table is ready. As staff, I can generate bills. |
+| **Platinum** | AI demand forecasting, realtime dish availability               | As a manager, I can see AI predictions for tonight's service. As staff, I can mark items out of stock instantly. |
+| **Bonus**    | Gemini ops assistant, wait-time alerts, bidirectional realtime   | As a manager, I can chat with an AI about sales data. As staff, I see alerts when tables exceed average wait times. |
 
 ## Getting Started
 
@@ -75,6 +84,16 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+## Scalability Notes
+
+To ensure the Smart Restaurant Management System can handle high traffic and multiple locations, the architecture is designed with the following scalability principles:
+
+- **Supabase Realtime Scaling:** Uses connection multiplexing to efficiently handle many concurrent WebSocket connections per restaurant, minimizing overhead and staying within channel limits.
+- **Multi-location Sharding Strategy:** `restaurant_id` serves as a natural partition key across all major tables (orders, menu items, tables), allowing for horizontal database sharding as the platform expands to new branches.
+- **CDN and Edge Caching:** Static assets, frontend pages, and unchanged API responses are distributed globally via Vercel's Edge Network, reducing latency for customers browsing menus.
+- **Database Indexing:** Critical query paths (e.g., active orders by status, wait times by table) are heavily indexed in PostgreSQL to ensure fast reads even with millions of historical records.
+- **Serverless Compute:** API routes and Server Actions run on Vercel's serverless infrastructure, automatically scaling horizontally to handle spikes in traffic during peak dining hours.
 
 ## License
 
