@@ -3,6 +3,8 @@ import { WaitTimeAlerts } from "@/components/dashboard/wait-time-alerts";
 import { analyzeWaitTimes } from "@/lib/utils/wait-time-analyzer";
 import { ClipboardList, Grid2X2, BadgeDollarSign, Clock } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardHome() {
   // Fetch wait-time analysis server-side
   let waitTimeData = { alerts: [] as any[], averageServiceMinutes: 35 };

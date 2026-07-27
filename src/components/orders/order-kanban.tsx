@@ -1,5 +1,7 @@
 "use client";
 
+import { Inbox } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useMemo } from "react";
 import { OrderCard } from "./order-card";
 import type { KanbanOrder } from "@/lib/hooks/use-realtime-orders";
@@ -58,6 +60,16 @@ export function OrderKanban({ orders, onRefetch }: OrderKanbanProps) {
     });
     return map;
   }, [orders]);
+
+  if (orders.length === 0) {
+    return (
+      <EmptyState
+        title="No Active Orders"
+        description="There are currently no active orders in the kitchen. Enjoy the downtime!"
+        icon={<Inbox className="h-10 w-10 text-muted-foreground" />}
+      />
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">

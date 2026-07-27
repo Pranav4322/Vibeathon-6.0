@@ -5,6 +5,7 @@ import { ShoppingBag, Utensils, MapPin } from "lucide-react";
 import { CategoryTabs } from "@/components/menu/category-tabs";
 import { MenuCard } from "@/components/menu/menu-card";
 import { CartSheet } from "@/components/menu/cart-sheet";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useCart } from "@/lib/hooks/use-cart";
 import type { Restaurant, Category, MenuItem } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
@@ -93,10 +94,12 @@ export function MenuClientView({
       {/* Menu grid */}
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-5">
         {filteredItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-stone-400">
-            <span className="text-5xl mb-4">🍽️</span>
-            <p className="text-sm font-medium">No items in this category</p>
-          </div>
+          <EmptyState
+            title="No Items Found"
+            description="There are no items in this category right now. Check back later!"
+            icon={<span className="text-4xl">🍽️</span>}
+            className="py-12 border-none"
+          />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {filteredItems.map((item) => (
