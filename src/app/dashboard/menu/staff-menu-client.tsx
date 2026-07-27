@@ -5,6 +5,8 @@ import { Utensils, Search, ArrowLeft, Circle } from "lucide-react";
 import Link from "next/link";
 import { AvailabilityToggle } from "@/components/staff/availability-toggle";
 import { useRealtimeMenu } from "@/lib/hooks/use-realtime-menu";
+import { PrepTimeInput } from "@/components/staff/prep-time-input";
+import { BulkPrepTimeInput } from "@/components/staff/bulk-prep-time";
 import type { Restaurant, Category, MenuItem, AvailabilityStatus } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
 
@@ -127,7 +129,10 @@ export function StaffMenuClient({ restaurant, categories, menuItems: initialItem
               className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-slate-500 outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/10 transition-all"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex items-center">
+            <BulkPrepTimeInput restaurantId={restaurant.id} />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1 items-center">
             <button
               onClick={() => setFilterCategory(null)}
               className={cn(
@@ -159,11 +164,12 @@ export function StaffMenuClient({ restaurant, categories, menuItems: initialItem
         {/* Menu items table */}
         <div className="bg-white/[0.03] rounded-2xl border border-white/5 overflow-hidden">
           {/* Table header */}
-          <div className="hidden sm:grid grid-cols-[1fr_120px_100px_80px_140px] gap-4 px-5 py-3 bg-white/[0.02] border-b border-white/5 text-xs text-slate-500 font-semibold uppercase tracking-wider">
+          <div className="hidden sm:grid grid-cols-[1fr_120px_100px_80px_100px_140px] gap-4 px-5 py-3 bg-white/[0.02] border-b border-white/5 text-xs text-slate-500 font-semibold uppercase tracking-wider">
             <span>Item</span>
             <span>Category</span>
             <span>Price</span>
             <span>Type</span>
+            <span>Prep Time</span>
             <span className="text-right">Status</span>
           </div>
 
@@ -179,7 +185,7 @@ export function StaffMenuClient({ restaurant, categories, menuItems: initialItem
                 <div
                   key={item.id}
                   className={cn(
-                    "grid grid-cols-1 sm:grid-cols-[1fr_120px_100px_80px_140px] gap-2 sm:gap-4 px-5 py-4 items-center transition-colors hover:bg-white/[0.02]",
+                    "grid grid-cols-1 sm:grid-cols-[1fr_120px_100px_80px_100px_140px] gap-2 sm:gap-4 px-5 py-4 items-center transition-colors hover:bg-white/[0.02]",
                     item.availability_status === "out" && "opacity-50"
                   )}
                 >
@@ -216,6 +222,9 @@ export function StaffMenuClient({ restaurant, categories, menuItems: initialItem
                         )}
                       />
                     </div>
+                  </div>
+                  <div>
+                    <PrepTimeInput menuItemId={item.id} initialTime={item.prep_time_minutes} />
                   </div>
                   <div className="flex justify-start sm:justify-end">
                     <AvailabilityToggle
