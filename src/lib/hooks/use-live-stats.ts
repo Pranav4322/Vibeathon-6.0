@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { Table } from "@/lib/types/database";
 
 export function useLiveRestaurantStats(restaurantId: string) {
   const [availableTables, setAvailableTables] = useState<number>(0);
@@ -14,11 +15,12 @@ export function useLiveRestaurantStats(restaurantId: string) {
     
     async function fetchStats() {
       // Fetch tables
-      const { data: tables } = await supabase
+      const { data } = await supabase
         .from("tables")
         .select("status")
         .eq("restaurant_id", restaurantId);
         
+      const tables = data as Table[] | null;
       if (tables) {
         setTotalTables(tables.length);
         setAvailableTables(tables.filter(t => t.status === 'free').length);

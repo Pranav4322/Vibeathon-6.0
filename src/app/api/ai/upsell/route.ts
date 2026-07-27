@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { geminiModel } from "@/lib/ai/gemini-client";
+import type { MenuItem } from "@/lib/types/database";
 
 export async function POST(request: Request) {
   try {
@@ -16,11 +17,13 @@ export async function POST(request: Request) {
     const supabase = await createClient();
 
     // 1. Fetch available menu items
-    const { data: menuItems, error } = await supabase
+    const { data, error } = await supabase
       .from("menu_items")
-      .select("id, name, description, price, category_id, image_url, availability_status, is_veg, prep_time_minutes, created_at")
+      .select("*")
       .eq("restaurant_id", restaurantId)
       .neq("availability_status", "out");
+
+    const menuItems = data as MenuItem[] | null;
 
     if (error || !menuItems) {
       console.error("Supabase error fetching menu items:", error);
