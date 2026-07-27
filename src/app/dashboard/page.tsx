@@ -1,7 +1,17 @@
 import { KPICard } from "@/components/dashboard/kpi-card";
+import { WaitTimeAlerts } from "@/components/dashboard/wait-time-alerts";
+import { analyzeWaitTimes } from "@/lib/utils/wait-time-analyzer";
 import { ClipboardList, Grid2X2, BadgeDollarSign, Clock } from "lucide-react";
 
-export default function DashboardHome() {
+export default async function DashboardHome() {
+  // Fetch wait-time analysis server-side
+  let waitTimeData = { alerts: [] as any[], averageServiceMinutes: 35 };
+  try {
+    waitTimeData = await analyzeWaitTimes();
+  } catch (error) {
+    console.error("Failed to fetch wait time data:", error);
+  }
+
   return (
     <div className="p-8">
       <div className="mb-8">
@@ -29,9 +39,17 @@ export default function DashboardHome() {
         />
         <KPICard
           title="Avg Wait Time"
-          value="18 min"
+          value={`${waitTimeData.averageServiceMinutes} min`}
           icon={Clock}
           trend={{ value: "2 min", isPositive: false }}
+        />
+      </div>
+
+      {/* Wait Time Alerts — Phase 13 */}
+      <div className="mt-8">
+        <WaitTimeAlerts
+          alerts={waitTimeData.alerts}
+          averageServiceMinutes={waitTimeData.averageServiceMinutes}
         />
       </div>
 
