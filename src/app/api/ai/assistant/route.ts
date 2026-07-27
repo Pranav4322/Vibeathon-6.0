@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     // Get a model instance with the system instruction
     const model = (await import('@/lib/ai/gemini-client')).genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: fullPrompt
     });
 
