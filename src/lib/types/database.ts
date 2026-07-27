@@ -83,6 +83,7 @@ export interface Staff {
   email: string;
   role: StaffRole;
   is_active: boolean;
+  pin_code: string | null;
   created_at: string;
 }
 
@@ -179,6 +180,7 @@ export interface StaffInsert {
   email: string;
   role?: StaffRole;
   is_active?: boolean;
+  pin_code?: string | null;
   created_at?: string;
 }
 

@@ -15,9 +15,11 @@ import {
   Bot,
   LogOut,
   Receipt,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { useStaffPin } from "@/lib/hooks/use-staff-pin";
 import { useRouter } from "next/navigation";
 
 const navItems = [
@@ -38,6 +40,7 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const { currentStaff, lockDevice } = useStaffPin();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -80,16 +83,25 @@ export function Sidebar() {
 
       <div className="border-t border-slate-800 p-4">
         <div className="mb-4 flex items-center gap-3 px-3">
-          <div className="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-300">
-            {user?.email?.[0].toUpperCase() || "U"}
+          <div className="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-300 uppercase">
+            {currentStaff?.name?.[0] || user?.email?.[0] || "U"}
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-medium text-slate-200">
-              {user?.email?.split("@")[0] || "Staff Member"}
+              {currentStaff?.name || user?.email?.split("@")[0] || "Staff Member"}
             </span>
-            <span className="text-xs text-slate-500">Staff</span>
+            <span className="text-xs text-slate-500 capitalize">{currentStaff?.role || "Staff"}</span>
           </div>
         </div>
+        
+        <button
+          onClick={lockDevice}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-amber-500 hover:bg-slate-800 transition-colors mb-1"
+        >
+          <Lock className="h-4 w-4" />
+          Lock Device
+        </button>
+
         <button
           onClick={handleSignOut}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-red-400 transition-colors"

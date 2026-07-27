@@ -119,7 +119,10 @@ export function useRealtimeOrders(restaurantId: string) {
           table: "orders",
           filter: `restaurant_id=eq.${restaurantId}`,
         },
-        () => {
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            import('@/lib/utils/audio').then(m => m.playKitchenPing());
+          }
           // Re-fetch all orders on any change for simplicity
           // (inserts, updates, and deletes all handled)
           fetchOrders();
