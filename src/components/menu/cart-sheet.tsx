@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCart } from "@/lib/hooks/use-cart";
 import { createRawClient } from "@/lib/supabase/raw-client";
+import { useAIUpsell } from "@/lib/hooks/use-ai-upsell";
+import { AIUpsellCard } from "./ai-upsell-card";
 
 interface CartSheetProps {
   open: boolean;
@@ -23,7 +25,8 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartSheetProps) {
-  const { items, updateQuantity, removeItem, totalAmount, totalItems, clearCart, specialInstructions, setSpecialInstructions } = useCart();
+  const { items, addItem, updateQuantity, removeItem, totalAmount, totalItems, clearCart, specialInstructions, setSpecialInstructions } = useCart();
+  const { recommendation, isLoading: isUpsellLoading, setRecommendation } = useAIUpsell(open, items, restaurantId);
   const [isPlacing, startPlacing] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -173,6 +176,19 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
                 </div>
               </div>
             ))}
+
+            {/* AI Upsell Card */}
+            {(recommendation || isUpsellLoading) && (
+              <AIUpsellCard
+                recommendation={recommendation}
+                isLoading={isUpsellLoading}
+                onAdd={(item) => {
+                  addItem(item);
+                  setRecommendation(null);
+                }}
+                onDismiss={() => setRecommendation(null)}
+              />
+            )}
 
             {/* Special instructions */}
             <div className="pt-2">
