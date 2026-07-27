@@ -5,6 +5,7 @@ import { Utensils, Clock, CheckCircle2, ChefHat, Bell, Receipt } from "lucide-re
 import { createClient } from "@/lib/supabase/client";
 import type { Order, OrderStatus, Table } from "@/lib/types/database";
 import { useNotifications } from "@/lib/hooks/use-notifications";
+import { GamifiedWaitCard } from "@/components/orders/gamified-wait";
 
 const STATUS_STEPS = [
   { key: "placed",    label: "Placed",     icon: Receipt,     color: "text-blue-500",   bg: "bg-blue-50"   },
@@ -161,17 +162,22 @@ export function OrderTrackingClient({ initialOrder, tableData, orderItems }: Ord
           </div>
         </div>
 
+        {/* Gamified Wait Experience */}
+        {(order.status === "confirmed" || order.status === "preparing") && (
+          <GamifiedWaitCard />
+        )}
+
         {/* Status message */}
         <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 text-center transition-all duration-300">
           <div className="flex items-center justify-center gap-2 text-amber-700">
             <Clock size={14} className="animate-pulse" />
             <span className="text-sm font-medium">
-              {order.status === "placed" && "Your order has been received! Staff will confirm shortly."}
-              {order.status === "confirmed" && "Order confirmed! The kitchen is preparing your food."}
-              {order.status === "preparing" && "Your food is being cooked fresh just for you! 🍳"}
-              {order.status === "ready" && "Your order is ready! Waiter is bringing it to you. 🎉"}
-              {order.status === "served" && "Enjoy your meal! 😊"}
-              {order.status === "billed" && "Thank you for dining with us! 🙏"}
+              {order.status === "placed" && "Your order is in! We're double-checking the details (and trying not to drool)."}
+              {order.status === "confirmed" && "Order confirmed! We've told the kitchen to make it extra delicious."}
+              {order.status === "preparing" && "The chefs are working their magic! 🍳 (Cue the dramatic cooking montage)."}
+              {order.status === "ready" && "Ding ding! Your food is ready and on its way. Prepare your tastebuds! 🎉"}
+              {order.status === "served" && "Enjoy your meal! Try not to eat the plate. 😋"}
+              {order.status === "billed" && "Hope you had a great meal! See you next time. 👋"}
             </span>
           </div>
         </div>
