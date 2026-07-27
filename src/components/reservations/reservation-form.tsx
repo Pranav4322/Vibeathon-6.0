@@ -37,41 +37,43 @@ export function ReservationForm({ restaurantId, onSuccess }: ReservationFormProp
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-lg backdrop-blur-sm bg-white/95 border-amber-100">
+    <Card className="w-full max-w-md mx-auto shadow-2xl backdrop-blur-md bg-slate-900/80 border-white/10 text-slate-50">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Reserve a Table</CardTitle>
-        <CardDescription className="text-center">
+        <CardTitle className="text-2xl font-bold text-center text-white">Reserve a Table</CardTitle>
+        <CardDescription className="text-center text-slate-400">
           Join our waitlist and get real-time updates.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="customerName">Your Name</Label>
-            <Input id="customerName" name="customerName" required placeholder="John Doe" />
+            <Label htmlFor="customerName" className="text-slate-300">Your Name</Label>
+            <Input id="customerName" name="customerName" required placeholder="John Doe" className="bg-slate-950 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-amber-500" />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="customerPhone">Phone Number</Label>
-            <Input id="customerPhone" name="customerPhone" type="tel" required placeholder="+1 234 567 8900" />
+            <Label htmlFor="customerPhone" className="text-slate-300">Phone Number</Label>
+            <Input id="customerPhone" name="customerPhone" type="tel" required placeholder="+1 234 567 8900" className="bg-slate-950 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-amber-500" />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="partySize">Party Size</Label>
+            <Label htmlFor="partySize" className="text-slate-300">Party Size</Label>
             <div className="flex items-center gap-4">
               <Button 
                 type="button" 
                 variant="outline" 
                 size="icon"
+                className="border-white/10 bg-slate-950 text-white hover:bg-slate-800 hover:text-white"
                 onClick={() => setPartySize(Math.max(1, partySize - 1))}
               >
                 -
               </Button>
-              <span className="text-xl font-medium w-8 text-center">{partySize}</span>
+              <span className="text-xl font-medium w-8 text-center text-white">{partySize}</span>
               <Button 
                 type="button" 
                 variant="outline" 
                 size="icon"
+                className="border-white/10 bg-slate-950 text-white hover:bg-slate-800 hover:text-white"
                 onClick={() => setPartySize(Math.min(20, partySize + 1))}
               >
                 +
@@ -80,12 +82,12 @@ export function ReservationForm({ restaurantId, onSuccess }: ReservationFormProp
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+          {error && <p className="text-red-400 text-sm font-medium">{error}</p>}
         </CardContent>
         <CardFooter>
           <Button 
             type="submit" 
-            className="w-full bg-amber-600 hover:bg-amber-700 text-white shadow-md transition-all" 
+            className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold shadow-[0_0_15px_rgba(245,158,11,0.2)] transition-all" 
             disabled={loading}
           >
             {loading ? "Joining..." : "Join Waitlist"}

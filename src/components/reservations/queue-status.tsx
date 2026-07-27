@@ -87,49 +87,49 @@ export function QueueStatus({ initialReservation, restaurantId, onCancel }: Queu
   
   if (reservation.status === 'seated') {
     return (
-      <Card className="w-full max-w-md mx-auto shadow-lg bg-green-50 border-green-200">
+      <Card className="w-full max-w-md mx-auto shadow-2xl backdrop-blur-md bg-green-500/10 border-green-500/20">
         <CardHeader>
-          <CardTitle className="text-center text-green-700">Table Ready! 🎉</CardTitle>
+          <CardTitle className="text-center text-green-400 text-2xl">Table Ready! 🎉</CardTitle>
         </CardHeader>
         <CardContent className="text-center pb-8">
-          <p className="text-green-800">Please head to the host stand. Your table is ready for you.</p>
+          <p className="text-green-200 text-lg">Please head to the host stand. Your table is ready for you.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-lg border-amber-100">
+    <Card className="w-full max-w-md mx-auto shadow-2xl backdrop-blur-md bg-slate-900/80 border-white/10 text-slate-50">
       <CardHeader className="text-center pb-2">
-        <Badge variant="outline" className="w-fit mx-auto mb-2 bg-amber-50 text-amber-700 border-amber-200">
+        <Badge variant="outline" className="w-fit mx-auto mb-2 bg-amber-500/10 text-amber-500 border-amber-500/20">
           In Queue
         </Badge>
-        <CardTitle className="text-2xl font-bold">You're on the list!</CardTitle>
+        <CardTitle className="text-2xl font-bold text-white">You're on the list!</CardTitle>
       </CardHeader>
       
       <CardContent className="space-y-6 pt-4">
         <div className="grid grid-cols-2 gap-4 text-center">
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-            <p className="text-sm text-slate-500 font-medium mb-1">Position</p>
-            <p className="text-4xl font-bold text-slate-900">#{partiesAhead + 1}</p>
-            <p className="text-xs text-slate-400 mt-1">{partiesAhead} parties ahead</p>
+          <div className="bg-slate-950 p-4 rounded-xl border border-white/5 shadow-inner">
+            <p className="text-sm text-slate-400 font-medium mb-1">Position</p>
+            <p className="text-4xl font-bold text-white">#{partiesAhead + 1}</p>
+            <p className="text-xs text-slate-500 mt-1">{partiesAhead} parties ahead</p>
           </div>
           
-          <div className="bg-amber-50 p-4 rounded-xl border border-amber-100">
-            <p className="text-sm text-amber-700/70 font-medium mb-1">Est. Wait</p>
-            <p className="text-4xl font-bold text-amber-600">~{estimatedMinutes}</p>
-            <p className="text-xs text-amber-600/70 mt-1">minutes</p>
+          <div className="bg-amber-500/10 p-4 rounded-xl border border-amber-500/20 shadow-inner">
+            <p className="text-sm text-amber-500/70 font-medium mb-1">Est. Wait</p>
+            <p className="text-4xl font-bold text-amber-500">~{estimatedMinutes}</p>
+            <p className="text-xs text-amber-500/70 mt-1">minutes</p>
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Progress</span>
-            <span className="font-medium">{partiesAhead === 0 ? "Next!" : "Waiting..."}</span>
+            <span className="text-slate-400">Progress</span>
+            <span className="font-medium text-white">{partiesAhead === 0 ? "Next!" : "Waiting..."}</span>
           </div>
-          <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-3 w-full bg-slate-950 rounded-full overflow-hidden border border-white/5">
             <div 
-              className="h-full bg-amber-500 transition-all duration-1000 ease-in-out"
+              className="h-full bg-amber-500 transition-all duration-1000 ease-in-out shadow-[0_0_10px_rgba(245,158,11,0.5)]"
               style={{ 
                 width: partiesAhead === 0 ? "100%" : `${Math.max(10, 100 - (partiesAhead * 15))}%` 
               }}
@@ -141,7 +141,7 @@ export function QueueStatus({ initialReservation, restaurantId, onCancel }: Queu
       <CardFooter>
         <Button 
           variant="ghost" 
-          className="w-full text-slate-500 hover:text-red-600 hover:bg-red-50"
+          className="w-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
           onClick={handleCancel}
           disabled={loadingCancel}
         >
