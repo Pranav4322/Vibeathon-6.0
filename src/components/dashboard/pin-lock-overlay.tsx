@@ -81,6 +81,9 @@ export function PinLockOverlay({ children }: { children: React.ReactNode }) {
               >
                 Switch User
               </button>
+              <span className="text-xs text-amber-500/70 mt-2 font-mono bg-amber-500/10 px-2 py-1 rounded">
+                Demo Hint: PIN is {selectedStaff.pin_code || '1234'}
+              </span>
             </div>
 
             <div className="mb-8 flex items-center justify-center gap-4">
