@@ -55,11 +55,11 @@ export function useRealtimeOrders(restaurantId: string) {
     const menuMap = new Map((menuRaw ?? []).map((m) => [m.id, m]));
 
     // Fetch table numbers
-    const tableIds = [...new Set(ordersList.map((o) => o.table_id))];
-    const { data: tablesRaw } = await supabase
+    const tableIds = [...new Set(ordersList.map((o) => o.table_id).filter(Boolean))];
+    const { data: tablesRaw } = tableIds.length > 0 ? await supabase
       .from("tables")
       .select("id, table_number")
-      .in("id", tableIds);
+      .in("id", tableIds) : { data: [] };
     const tableMap = new Map(
       ((tablesRaw ?? []) as Pick<Table, "id" | "table_number">[]).map((t) => [t.id, t.table_number])
     );
@@ -67,7 +67,7 @@ export function useRealtimeOrders(restaurantId: string) {
     const now = Date.now();
     const kanbanOrders: KanbanOrder[] = ordersList.map((o) => ({
       ...o,
-      table_number: tableMap.get(o.table_id) ?? "—",
+      table_number: (o.table_id ? tableMap.get(o.table_id) : null) ?? "—",
       items: allItems
         .filter((i) => i.order_id === o.id)
         .map((i) => ({

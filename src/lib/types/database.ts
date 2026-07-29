@@ -66,6 +66,7 @@ export interface MenuItem {
   is_veg: boolean;
   prep_time_minutes: number | null;
   course_category: CourseCategory;
+  available_modifiers: { name: string; price: number }[];
   created_at: string;
 }
 
@@ -93,7 +94,7 @@ export interface Staff {
 export interface Order {
   id: string;
   restaurant_id: string;
-  table_id: string;
+  table_id: string | null;
   staff_id: string | null;
   customer_name: string | null;
   status: OrderStatus;
@@ -106,6 +107,8 @@ export interface Order {
   served_at: string | null;
   billed_at: string | null;
   chef_override_minutes: number | null;
+  reservation_id: string | null;
+  is_pre_order: boolean;
 }
 
 export interface OrderItem {
@@ -117,6 +120,8 @@ export interface OrderItem {
   subtotal: number;
   notes: string | null;
   course_override: CourseCategory | null;
+  modifiers: { name: string; price: number }[];
+  is_held: boolean;
 }
 
 export interface Reservation {
@@ -166,6 +171,7 @@ export interface MenuItemInsert {
   is_veg?: boolean;
   prep_time_minutes?: number | null;
   course_category?: CourseCategory;
+  available_modifiers?: { name: string; price: number }[];
   created_at?: string;
 }
 
@@ -193,7 +199,7 @@ export interface StaffInsert {
 export interface OrderInsert {
   id?: string;
   restaurant_id: string;
-  table_id: string;
+  table_id?: string | null;
   staff_id?: string | null;
   customer_name?: string | null;
   status?: OrderStatus;
@@ -206,6 +212,8 @@ export interface OrderInsert {
   served_at?: string | null;
   billed_at?: string | null;
   chef_override_minutes?: number | null;
+  reservation_id?: string | null;
+  is_pre_order?: boolean;
 }
 
 export interface OrderItemInsert {
@@ -217,6 +225,8 @@ export interface OrderItemInsert {
   subtotal: number;
   notes?: string | null;
   course_override?: CourseCategory | null;
+  modifiers?: { name: string; price: number }[];
+  is_held?: boolean;
 }
 
 export interface ReservationInsert {

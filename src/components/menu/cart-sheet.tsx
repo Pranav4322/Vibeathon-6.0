@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Minus, Plus, ShoppingBag, Trash2, ChevronRight, Loader2 } from "lucide-react";
 import {
   Sheet,
@@ -17,6 +17,7 @@ import { createRawClient } from "@/lib/supabase/raw-client";
 import { useAIUpsell } from "@/lib/hooks/use-ai-upsell";
 import { AIUpsellCard } from "./ai-upsell-card";
 import type { CourseCategory } from "@/lib/types/database";
+import { cn } from "@/lib/utils";
 
 interface CartSheetProps {
   open: boolean;
@@ -26,11 +27,13 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartSheetProps) {
-  const { items, addItem, updateQuantity, removeItem, totalAmount, totalItems, clearCart, specialInstructions, setSpecialInstructions, updateCourseOverride } = useCart();
+  const { items, addItem, updateQuantity, removeItem, totalAmount, totalItems, clearCart, specialInstructions, setSpecialInstructions, updateCourseOverride, toggleHold } = useCart();
   const { recommendation, isLoading: isUpsellLoading, setRecommendation } = useAIUpsell(open, items, restaurantId);
   const [isPlacing, startPlacing] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const reservationId = searchParams.get("reservation");
 
   async function placeOrder() {
     setError(null);
@@ -38,32 +41,44 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
       try {
         const supabase = createRawClient();
 
-        // Get the table ID for the given restaurant + table_number
-        const { data: tableData, error: tableErr } = await supabase
-          .from("tables")
-          .select("id")
-          .eq("restaurant_id", restaurantId)
-          .eq("table_number", tableNumber)
-          .single();
+        // Check if pre-order (no table needed)
+        let tableId = null;
+        if (!reservationId) {
+          // Get the table ID for the given restaurant + table_number
+          const { data: tableData, error: tableErr } = await supabase
+            .from("tables")
+            .select("id")
+            .eq("restaurant_id", restaurantId)
+            .eq("table_number", tableNumber)
+            .single();
 
-        if (tableErr || !tableData) {
-          setError("Couldn't find your table. Please check the QR code and try again.");
-          return;
+          if (tableErr || !tableData) {
+            setError("Couldn't find your table. Please check the QR code and try again.");
+            return;
+          }
+          tableId = tableData.id;
         }
 
         const totalAmt = items.reduce(
-          (sum, i) => sum + i.menuItem.price * i.quantity,
+          (sum, i) => {
+            const modifierPrice = i.modifiers?.reduce((mSum, m) => mSum + Number(m.price), 0) || 0;
+            return sum + (i.menuItem.price + modifierPrice) * i.quantity;
+          },
           0
         );
 
-        // Check for active order
-        const { data: activeOrders } = await supabase
-          .from("orders")
-          .select("id, total_amount, special_instructions")
-          .eq("restaurant_id", restaurantId)
-          .eq("table_id", tableData.id)
-          .neq("status", "billed")
-          .limit(1);
+        // Check for active order ONLY if we have a table (i.e. not a pre-order)
+        let activeOrders = null;
+        if (tableId) {
+          const { data } = await supabase
+            .from("orders")
+            .select("id, total_amount, special_instructions")
+            .eq("restaurant_id", restaurantId)
+            .eq("table_id", tableId)
+            .neq("status", "billed")
+            .limit(1);
+          activeOrders = data;
+        }
 
         let orderId = "";
 
@@ -87,10 +102,12 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
             .from("orders")
             .insert({
               restaurant_id: restaurantId,
-              table_id: tableData.id,
+              table_id: tableId,
               status: "placed",
               special_instructions: specialInstructions || null,
               total_amount: totalAmt,
+              reservation_id: reservationId || null,
+              is_pre_order: !!reservationId,
             })
             .select("id")
             .single();
@@ -103,14 +120,19 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
         }
 
         // Insert order items
-        const orderItems = items.map((i) => ({
-          order_id: orderId,
-          menu_item_id: i.menuItem.id,
-          quantity: i.quantity,
-          unit_price: i.menuItem.price,
-          subtotal: i.menuItem.price * i.quantity,
-          course_override: i.courseOverride || null,
-        }));
+        const orderItems = items.map((i) => {
+          const modPrice = i.modifiers?.reduce((sum, m) => sum + Number(m.price), 0) || 0;
+          return {
+            order_id: orderId,
+            menu_item_id: i.menuItem.id,
+            quantity: i.quantity,
+            unit_price: i.menuItem.price,
+            subtotal: (i.menuItem.price + modPrice) * i.quantity,
+            course_override: i.courseOverride || null,
+            modifiers: i.modifiers || [],
+            is_held: i.isHeld || false,
+          };
+        });
 
         const { error: itemsErr } = await supabase
           .from("order_items")
@@ -121,11 +143,13 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
           return;
         }
 
-        // Mark table as occupied
-        await supabase
-          .from("tables")
-          .update({ status: "occupied", occupied_since: new Date().toISOString() })
-          .eq("id", tableData.id);
+        if (tableId) {
+          // Mark table as occupied
+          await supabase
+            .from("tables")
+            .update({ status: "occupied", occupied_since: new Date().toISOString() })
+            .eq("id", tableId);
+        }
 
         clearCart();
         onClose();
@@ -155,7 +179,9 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
               <SheetTitle className="text-lg font-bold text-stone-800">
                 Your Order
               </SheetTitle>
-              <p className="text-xs text-stone-500">Table {tableNumber} · {totalItems()} item{totalItems() !== 1 ? "s" : ""}</p>
+              <p className="text-xs text-stone-500">
+                {reservationId ? "Pre-order" : `Table ${tableNumber}`} · {totalItems()} item{totalItems() !== 1 ? "s" : ""}
+              </p>
             </div>
           </div>
         </SheetHeader>
@@ -163,61 +189,81 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
         {/* Items */}
         <ScrollArea className="flex-1 px-5">
           <div className="py-4 space-y-3">
-            {items.map((item) => (
-              <div
-                key={item.menuItem.id}
-                className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-stone-800 truncate">
-                    {item.menuItem.name}
-                  </p>
-                  <p className="text-xs text-stone-500 mt-0.5">
-                    ₹{item.menuItem.price.toFixed(0)} × {item.quantity} ={" "}
-                    <span className="font-semibold text-stone-700">
-                      ₹{(item.menuItem.price * item.quantity).toFixed(0)}
-                    </span>
-                  </p>
-                  <div className="mt-1.5">
-                    <select
-                      value={item.courseOverride || item.menuItem.course_category}
-                      onChange={(e) => updateCourseOverride(item.menuItem.id, e.target.value as CourseCategory)}
-                      className="text-[10px] uppercase font-bold text-slate-500 bg-stone-100 border-none rounded px-2 py-1 outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer"
+            {items.map((item) => {
+              const modPrice = item.modifiers?.reduce((sum, m) => sum + Number(m.price), 0) || 0;
+              const itemTotal = (item.menuItem.price + modPrice) * item.quantity;
+              
+              return (
+                <div
+                  key={item.cartItemId}
+                  className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-stone-800 truncate">
+                      {item.menuItem.name}
+                    </p>
+                    {item.modifiers && item.modifiers.length > 0 && (
+                      <p className="text-[10px] text-stone-500 my-0.5">
+                        {item.modifiers.map(m => m.name).join(", ")} {modPrice > 0 && `(+₹${modPrice})`}
+                      </p>
+                    )}
+                    <p className="text-xs text-stone-500 mt-0.5">
+                      ₹{(item.menuItem.price + modPrice).toFixed(0)} × {item.quantity} ={" "}
+                      <span className="font-semibold text-stone-700">
+                        ₹{itemTotal.toFixed(0)}
+                      </span>
+                    </p>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <select
+                        value={item.courseOverride || item.menuItem.course_category}
+                        onChange={(e) => updateCourseOverride(item.cartItemId, e.target.value as CourseCategory)}
+                        className="text-[10px] uppercase font-bold text-slate-500 bg-stone-100 border-none rounded px-2 py-1 outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer"
+                      >
+                        <option value="starter">Bring as Starter</option>
+                        <option value="main">Bring as Main</option>
+                        <option value="dessert">Bring as Dessert</option>
+                        <option value="beverage">Bring as Beverage</option>
+                      </select>
+                      
+                      <button 
+                        onClick={() => toggleHold(item.cartItemId)}
+                        className={cn(
+                          "text-[10px] font-bold px-2 py-1 rounded transition-colors",
+                          item.isHeld ? "bg-orange-100 text-orange-700 border border-orange-200" : "bg-stone-100 text-stone-500 hover:bg-stone-200"
+                        )}
+                      >
+                        {item.isHeld ? '✋ HELD' : 'Hold'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Controls */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
                     >
-                      <option value="starter">Bring as Starter</option>
-                      <option value="main">Bring as Main</option>
-                      <option value="dessert">Bring as Dessert</option>
-                      <option value="beverage">Bring as Beverage</option>
-                    </select>
+                      <Minus size={12} />
+                    </button>
+                    <span className="w-6 text-center text-sm font-bold text-stone-700">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
+                    >
+                      <Plus size={12} />
+                    </button>
+                    <button
+                      onClick={() => removeItem(item.cartItemId)}
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-red-50 text-red-400 hover:bg-red-100 transition-colors ml-1"
+                    >
+                      <Trash2 size={12} />
+                    </button>
                   </div>
                 </div>
-
-                {/* Controls */}
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => updateQuantity(item.menuItem.id, item.quantity - 1)}
-                    className="w-7 h-7 flex items-center justify-center rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
-                  >
-                    <Minus size={12} />
-                  </button>
-                  <span className="w-6 text-center text-sm font-bold text-stone-700">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => updateQuantity(item.menuItem.id, item.quantity + 1)}
-                    className="w-7 h-7 flex items-center justify-center rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
-                  >
-                    <Plus size={12} />
-                  </button>
-                  <button
-                    onClick={() => removeItem(item.menuItem.id)}
-                    className="w-7 h-7 flex items-center justify-center rounded-full bg-red-50 text-red-400 hover:bg-red-100 transition-colors ml-1"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
 
             {/* AI Upsell Card */}
             {(recommendation || isUpsellLoading) && (

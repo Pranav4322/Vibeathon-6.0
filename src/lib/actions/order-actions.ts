@@ -156,3 +156,23 @@ export async function updateChefOverride(
 
   return { success: true };
 }
+
+/**
+ * Fires a held order item (changes is_held to false).
+ */
+export async function fireOrderItem(
+  orderItemId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("order_items")
+    .update({ is_held: false } as never)
+    .eq("id", orderItemId);
+
+  if (error) {
+    return { success: false, error: "Failed to fire item." };
+  }
+
+  return { success: true };
+}

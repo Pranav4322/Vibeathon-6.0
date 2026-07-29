@@ -92,3 +92,9 @@ INSERT INTO staff (restaurant_id, name, email, role, pin_code) VALUES
   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Manager Mike', 'mike@spicegarden.com', 'manager', '4321'),
   ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Waiter Will', 'will@spicegarden.com', 'waiter', '0000')
 ON CONFLICT (email, restaurant_id) DO NOTHING;
+
+-- Phase 19 Modifiers
+UPDATE menu_items SET available_modifiers = '[{"name": "Extra Spicy", "price": 0}, {"name": "Jain (No Onion/Garlic)", "price": 0}]'::jsonb WHERE name = 'Paneer Tikka';
+UPDATE menu_items SET available_modifiers = '[{"name": "Extra Chicken", "price": 99}, {"name": "Extra Raita", "price": 20}]'::jsonb WHERE name = 'Chicken Biryani';
+UPDATE menu_items SET available_modifiers = '[{"name": "Extra Butter", "price": 10}]'::jsonb WHERE name = 'Butter Naan';
+UPDATE menu_items SET available_modifiers = '[{"name": "Less Sweet", "price": 0}]'::jsonb WHERE name = 'Mango Lassi';

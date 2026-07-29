@@ -5,9 +5,12 @@ import { persist } from "zustand/middleware";
 import type { MenuItem, CourseCategory } from "@/lib/types/database";
 
 export interface CartItem {
+  cartItemId: string;
   menuItem: MenuItem;
   quantity: number;
   courseOverride?: CourseCategory;
+  modifiers: { name: string; price: number }[];
+  isHeld: boolean;
 }
 
 interface CartStore {
@@ -18,10 +21,11 @@ interface CartStore {
 
   // Actions
   setContext: (restaurantId: string, tableNumber: string) => void;
-  addItem: (menuItem: MenuItem) => void;
-  removeItem: (menuItemId: string) => void;
-  updateQuantity: (menuItemId: string, quantity: number) => void;
-  updateCourseOverride: (menuItemId: string, course: CourseCategory) => void;
+  addItem: (menuItem: MenuItem, modifiers?: { name: string; price: number }[], isHeld?: boolean) => void;
+  removeItem: (cartItemId: string) => void;
+  updateQuantity: (cartItemId: string, quantity: number) => void;
+  updateCourseOverride: (cartItemId: string, course: CourseCategory) => void;
+  toggleHold: (cartItemId: string) => void;
   setSpecialInstructions: (text: string) => void;
   clearCart: () => void;
 
@@ -41,43 +45,58 @@ export const useCart = create<CartStore>()(
       setContext: (restaurantId, tableNumber) =>
         set({ restaurantId, tableNumber }),
 
-      addItem: (menuItem) => {
+      addItem: (menuItem, modifiers = [], isHeld = false) => {
         const existing = get().items.find(
-          (i) => i.menuItem.id === menuItem.id
+          (i) => i.menuItem.id === menuItem.id &&
+                 i.isHeld === isHeld &&
+                 JSON.stringify(i.modifiers) === JSON.stringify(modifiers)
         );
         if (existing) {
           set({
             items: get().items.map((i) =>
-              i.menuItem.id === menuItem.id
+              i.cartItemId === existing.cartItemId
                 ? { ...i, quantity: i.quantity + 1 }
                 : i
             ),
           });
         } else {
-          set({ items: [...get().items, { menuItem, quantity: 1 }] });
+          // Use a simple random id if crypto is not available in all contexts (e.g., older browsers/server rendering)
+          const cartItemId = typeof crypto !== 'undefined' && crypto.randomUUID 
+            ? crypto.randomUUID() 
+            : Date.now().toString(36) + Math.random().toString(36).substring(2);
+            
+          set({ items: [...get().items, { cartItemId, menuItem, quantity: 1, modifiers, isHeld }] });
         }
       },
 
-      removeItem: (menuItemId) => {
-        set({ items: get().items.filter((i) => i.menuItem.id !== menuItemId) });
+      removeItem: (cartItemId) => {
+        set({ items: get().items.filter((i) => i.cartItemId !== cartItemId) });
       },
 
-      updateQuantity: (menuItemId, quantity) => {
+      updateQuantity: (cartItemId, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(menuItemId);
+          get().removeItem(cartItemId);
           return;
         }
         set({
           items: get().items.map((i) =>
-            i.menuItem.id === menuItemId ? { ...i, quantity } : i
+            i.cartItemId === cartItemId ? { ...i, quantity } : i
           ),
         });
       },
 
-      updateCourseOverride: (menuItemId, course) => {
+      updateCourseOverride: (cartItemId, course) => {
         set({
           items: get().items.map((i) =>
-            i.menuItem.id === menuItemId ? { ...i, courseOverride: course } : i
+            i.cartItemId === cartItemId ? { ...i, courseOverride: course } : i
+          ),
+        });
+      },
+
+      toggleHold: (cartItemId) => {
+        set({
+          items: get().items.map((i) =>
+            i.cartItemId === cartItemId ? { ...i, isHeld: !i.isHeld } : i
           ),
         });
       },
@@ -90,7 +109,10 @@ export const useCart = create<CartStore>()(
       totalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
 
       totalAmount: () =>
-        get().items.reduce((sum, i) => sum + i.menuItem.price * i.quantity, 0),
+        get().items.reduce((sum, i) => {
+          const modifierPrice = i.modifiers.reduce((mSum, m) => mSum + Number(m.price), 0);
+          return sum + (i.menuItem.price + modifierPrice) * i.quantity;
+        }, 0),
     }),
     {
       name: "restaurant-cart",

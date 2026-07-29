@@ -47,12 +47,15 @@ export default async function OrderPage({ params }: Props) {
   const order = data as Order;
 
   // Fetch table info
-  const { data: tableRaw } = await supabase
-    .from("tables")
-    .select("*")
-    .eq("id", order.table_id)
-    .single();
-  const tableData = tableRaw as Table | null;
+  let tableData: Table | null = null;
+  if (order.table_id) {
+    const { data: tableRaw } = await supabase
+      .from("tables")
+      .select("*")
+      .eq("id", order.table_id)
+      .single();
+    tableData = tableRaw as Table | null;
+  }
 
   // Fetch order items
   const { data: itemsRaw } = await supabase

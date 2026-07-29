@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { Clock, ChevronRight, Utensils, Plus } from "lucide-react";
-import { advanceOrderStatus, updateChefOverride } from "@/lib/actions/order-actions";
+import { advanceOrderStatus, updateChefOverride, fireOrderItem } from "@/lib/actions/order-actions";
 import type { KanbanOrder } from "@/lib/hooks/use-realtime-orders";
 import type { OrderStatus } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
@@ -48,6 +48,13 @@ export function OrderCard({ order, onAdvanced }: OrderCardProps) {
     startTransition(async () => {
       const currentOverride = order.chef_override_minutes || 0;
       await updateChefOverride(order.id, currentOverride + minutes);
+      onAdvanced?.();
+    });
+  }
+
+  function handleFireItem(itemId: string) {
+    startTransition(async () => {
+      await fireOrderItem(itemId);
       onAdvanced?.();
     });
   }
@@ -128,8 +135,29 @@ export function OrderCard({ order, onAdvanced }: OrderCardProps) {
                   >
                     <div className={cn("w-1 h-1 rounded-full", item.is_veg ? "bg-green-500" : "bg-red-500")} />
                   </div>
-                  <span className="text-xs text-slate-300 flex-1 truncate">{item.menu_item_name}</span>
-                  <span className="text-xs text-slate-500 font-medium">×{item.quantity}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs text-slate-300 truncate block">{item.menu_item_name}</span>
+                    {/* Render modifiers if present */}
+                    {item.modifiers && item.modifiers.length > 0 && (
+                      <span className="text-[9px] text-slate-500 block truncate">
+                        {item.modifiers.map(m => m.name).join(", ")}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
+                    ×{item.quantity}
+                  </span>
+                  
+                  {/* Fire button if held */}
+                  {item.is_held && (
+                    <button 
+                      onClick={() => handleFireItem(item.id)}
+                      disabled={isPending}
+                      className="ml-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition-colors disabled:opacity-50"
+                    >
+                      FIRE
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

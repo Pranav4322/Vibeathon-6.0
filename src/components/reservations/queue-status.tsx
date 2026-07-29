@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNotifications } from "@/lib/hooks/use-notifications";
+import { useRouter } from "next/navigation";
 
 interface QueueStatusProps {
   initialReservation: any;
@@ -18,6 +19,7 @@ export function QueueStatus({ initialReservation, restaurantId, onCancel }: Queu
   const [reservation, setReservation] = useState(initialReservation);
   const [partiesAhead, setPartiesAhead] = useState(0);
   const [loadingCancel, setLoadingCancel] = useState(false);
+  const router = useRouter();
   useNotifications({ restaurantId, reservationId: reservation.id });
   
   useEffect(() => {
@@ -136,6 +138,14 @@ export function QueueStatus({ initialReservation, restaurantId, onCancel }: Queu
             />
           </div>
         </div>
+        
+        {/* Phase 19: Pre-order CTA */}
+        <Button 
+          className="w-full mt-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
+          onClick={() => router.push(`/menu/${restaurantId}?reservation=${reservation.id}`)}
+        >
+          Pre-order Food
+        </Button>
       </CardContent>
       
       <CardFooter>

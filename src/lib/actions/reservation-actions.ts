@@ -96,6 +96,21 @@ export async function seatReservation(reservationId: string, restaurantId: strin
     // Continue anyway as the primary action succeeded
   }
 
+  // 3. Phase 19: Link and fire any pre-orders
+  const { error: preOrderError } = await supabase
+    .from("orders")
+    .update({ 
+      table_id: tableId, 
+      status: "confirmed", // Fire to kitchen
+      is_pre_order: false // Unmark so it behaves like a regular order now
+    } as never)
+    .eq("reservation_id", reservationId)
+    .eq("is_pre_order", true);
+
+  if (preOrderError) {
+    console.error("Error linking pre-orders:", preOrderError);
+  }
+
   revalidatePath(`/staff/reservations`);
   return { success: true };
 }
