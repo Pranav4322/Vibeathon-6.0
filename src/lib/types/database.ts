@@ -70,6 +70,24 @@ export interface MenuItem {
   created_at: string;
 }
 
+export interface Ingredient {
+  id: string;
+  restaurant_id: string;
+  name: string;
+  unit: string;
+  quantity_in_stock: number;
+  low_stock_threshold: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RecipeIngredient {
+  id: string;
+  menu_item_id: string;
+  ingredient_id: string;
+  quantity_required: number;
+}
+
 export interface Table {
   id: string;
   restaurant_id: string;
@@ -109,6 +127,7 @@ export interface Order {
   chef_override_minutes: number | null;
   reservation_id: string | null;
   is_pre_order: boolean;
+  ingredients_deducted: boolean;
 }
 
 export interface OrderItem {
@@ -175,6 +194,24 @@ export interface MenuItemInsert {
   created_at?: string;
 }
 
+export interface IngredientInsert {
+  id?: string;
+  restaurant_id: string;
+  name: string;
+  unit: string;
+  quantity_in_stock?: number;
+  low_stock_threshold?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface RecipeIngredientInsert {
+  id?: string;
+  menu_item_id: string;
+  ingredient_id: string;
+  quantity_required: number;
+}
+
 export interface TableInsert {
   id?: string;
   restaurant_id: string;
@@ -214,6 +251,7 @@ export interface OrderInsert {
   chef_override_minutes?: number | null;
   reservation_id?: string | null;
   is_pre_order?: boolean;
+  ingredients_deducted?: boolean;
 }
 
 export interface OrderItemInsert {
@@ -250,6 +288,8 @@ export interface ReservationInsert {
 export type RestaurantUpdate = Partial<RestaurantInsert>;
 export type CategoryUpdate = Partial<CategoryInsert>;
 export type MenuItemUpdate = Partial<MenuItemInsert>;
+export type IngredientUpdate = Partial<IngredientInsert>;
+export type RecipeIngredientUpdate = Partial<RecipeIngredientInsert>;
 export type TableUpdate = Partial<TableInsert>;
 export type StaffUpdate = Partial<StaffInsert>;
 export type OrderUpdate = Partial<OrderInsert>;
@@ -284,6 +324,23 @@ export interface Database {
         Relationships: [
           { foreignKeyName: "menu_items_restaurant_id_fkey"; columns: ["restaurant_id"]; isOneToOne: false; referencedRelation: "restaurants"; referencedColumns: ["id"] },
           { foreignKeyName: "menu_items_category_id_fkey"; columns: ["category_id"]; isOneToOne: false; referencedRelation: "categories"; referencedColumns: ["id"] }
+        ];
+      };
+      ingredients: {
+        Row: Ingredient;
+        Insert: IngredientInsert;
+        Update: IngredientUpdate;
+        Relationships: [
+          { foreignKeyName: "ingredients_restaurant_id_fkey"; columns: ["restaurant_id"]; isOneToOne: false; referencedRelation: "restaurants"; referencedColumns: ["id"] }
+        ];
+      };
+      recipe_ingredients: {
+        Row: RecipeIngredient;
+        Insert: RecipeIngredientInsert;
+        Update: RecipeIngredientUpdate;
+        Relationships: [
+          { foreignKeyName: "recipe_ingredients_menu_item_id_fkey"; columns: ["menu_item_id"]; isOneToOne: false; referencedRelation: "menu_items"; referencedColumns: ["id"] },
+          { foreignKeyName: "recipe_ingredients_ingredient_id_fkey"; columns: ["ingredient_id"]; isOneToOne: false; referencedRelation: "ingredients"; referencedColumns: ["id"] }
         ];
       };
       tables: {

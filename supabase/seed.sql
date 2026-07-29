@@ -98,3 +98,57 @@ UPDATE menu_items SET available_modifiers = '[{"name": "Extra Spicy", "price": 0
 UPDATE menu_items SET available_modifiers = '[{"name": "Extra Chicken", "price": 99}, {"name": "Extra Raita", "price": 20}]'::jsonb WHERE name = 'Chicken Biryani';
 UPDATE menu_items SET available_modifiers = '[{"name": "Extra Butter", "price": 10}]'::jsonb WHERE name = 'Butter Naan';
 UPDATE menu_items SET available_modifiers = '[{"name": "Less Sweet", "price": 0}]'::jsonb WHERE name = 'Mango Lassi';
+
+-- Phase 20: Ingredients
+INSERT INTO ingredients (id, restaurant_id, name, unit, quantity_in_stock, low_stock_threshold) VALUES
+  ('f0000001-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Paneer', 'g', 5000, 1000),
+  ('f0000002-0000-0000-0000-000000000002', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Chicken', 'g', 10000, 2000),
+  ('f0000003-0000-0000-0000-000000000003', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Basmati Rice', 'g', 20000, 5000),
+  ('f0000004-0000-0000-0000-000000000004', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Butter', 'g', 2000, 500),
+  ('f0000005-0000-0000-0000-000000000005', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Black Lentils', 'g', 5000, 1000),
+  ('f0000006-0000-0000-0000-000000000006', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Milk', 'ml', 10000, 2000),
+  ('f0000007-0000-0000-0000-000000000007', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Wheat Flour', 'g', 15000, 3000),
+  ('f0000008-0000-0000-0000-000000000008', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Tomatoes', 'g', 8000, 1500),
+  ('f0000009-0000-0000-0000-000000000009', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Onions', 'g', 10000, 2000)
+ON CONFLICT DO NOTHING;
+
+-- Phase 20: Recipe Ingredients
+INSERT INTO recipe_ingredients (menu_item_id, ingredient_id, quantity_required)
+SELECT m.id, i.id, 200 FROM menu_items m, ingredients i WHERE m.name = 'Paneer Tikka' AND i.name = 'Paneer'
+UNION ALL
+SELECT m.id, i.id, 100 FROM menu_items m, ingredients i WHERE m.name = 'Paneer Tikka' AND i.name = 'Onions'
+UNION ALL
+SELECT m.id, i.id, 250 FROM menu_items m, ingredients i WHERE m.name = 'Chicken Seekh Kebab' AND i.name = 'Chicken'
+UNION ALL
+SELECT m.id, i.id, 150 FROM menu_items m, ingredients i WHERE m.name = 'Dal Makhani' AND i.name = 'Black Lentils'
+UNION ALL
+SELECT m.id, i.id, 50 FROM menu_items m, ingredients i WHERE m.name = 'Dal Makhani' AND i.name = 'Butter'
+UNION ALL
+SELECT m.id, i.id, 200 FROM menu_items m, ingredients i WHERE m.name = 'Butter Chicken' AND i.name = 'Chicken'
+UNION ALL
+SELECT m.id, i.id, 100 FROM menu_items m, ingredients i WHERE m.name = 'Butter Chicken' AND i.name = 'Tomatoes'
+UNION ALL
+SELECT m.id, i.id, 50 FROM menu_items m, ingredients i WHERE m.name = 'Butter Chicken' AND i.name = 'Butter'
+UNION ALL
+SELECT m.id, i.id, 150 FROM menu_items m, ingredients i WHERE m.name = 'Palak Paneer' AND i.name = 'Paneer'
+UNION ALL
+SELECT m.id, i.id, 200 FROM menu_items m, ingredients i WHERE m.name = 'Chicken Biryani' AND i.name = 'Chicken'
+UNION ALL
+SELECT m.id, i.id, 150 FROM menu_items m, ingredients i WHERE m.name = 'Chicken Biryani' AND i.name = 'Basmati Rice'
+UNION ALL
+SELECT m.id, i.id, 150 FROM menu_items m, ingredients i WHERE m.name = 'Veg Biryani' AND i.name = 'Basmati Rice'
+UNION ALL
+SELECT m.id, i.id, 100 FROM menu_items m, ingredients i WHERE m.name = 'Butter Naan' AND i.name = 'Wheat Flour'
+UNION ALL
+SELECT m.id, i.id, 20 FROM menu_items m, ingredients i WHERE m.name = 'Butter Naan' AND i.name = 'Butter'
+UNION ALL
+SELECT m.id, i.id, 100 FROM menu_items m, ingredients i WHERE m.name = 'Garlic Naan' AND i.name = 'Wheat Flour'
+UNION ALL
+SELECT m.id, i.id, 100 FROM menu_items m, ingredients i WHERE m.name = 'Tandoori Roti' AND i.name = 'Wheat Flour'
+UNION ALL
+SELECT m.id, i.id, 100 FROM menu_items m, ingredients i WHERE m.name = 'Gulab Jamun' AND i.name = 'Milk'
+UNION ALL
+SELECT m.id, i.id, 200 FROM menu_items m, ingredients i WHERE m.name = 'Mango Lassi' AND i.name = 'Milk'
+UNION ALL
+SELECT m.id, i.id, 150 FROM menu_items m, ingredients i WHERE m.name = 'Masala Chai' AND i.name = 'Milk'
+ON CONFLICT DO NOTHING;

@@ -1,11 +1,39 @@
-export default function InventoryPage() {
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import type { Ingredient } from "@/lib/types/database";
+import { InventoryClient } from "./inventory-client";
+
+export const metadata: Metadata = {
+  title: "Inventory Management — Staff",
+  description: "Manage raw ingredients and stock levels in real time.",
+};
+
+export default async function InventoryPage() {
+  const supabase = await createClient();
+
+  const { data: restaurantRaw } = await supabase
+    .from("restaurants")
+    .select("id, name")
+    .limit(1)
+    .single();
+
+  const restaurant = restaurantRaw as { id: string; name: string } | null;
+
+  if (!restaurant) {
+    redirect("/login");
+  }
+
+  const { data: ingredients } = await supabase
+    .from("ingredients")
+    .select("*")
+    .eq("restaurant_id", restaurant.id)
+    .order("name", { ascending: true });
+
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold tracking-tight text-slate-900">Inventory</h1>
-      <p className="mt-2 text-slate-500">Manage stock levels and ingredients.</p>
-      <div className="mt-8 rounded-xl border border-dashed border-slate-200 bg-white p-12 text-center text-slate-500">
-        Inventory management coming in a future phase.
-      </div>
-    </div>
+    <InventoryClient
+      restaurant={restaurant}
+      initialIngredients={(ingredients ?? []) as Ingredient[]}
+    />
   );
 }
