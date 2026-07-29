@@ -135,3 +135,24 @@ export async function updateMenuAvailability(
 
   return { success: true };
 }
+
+/**
+ * Updates the chef override minutes for an order's estimated wait time.
+ */
+export async function updateChefOverride(
+  orderId: string,
+  minutes: number
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("orders")
+    .update({ chef_override_minutes: minutes } as never)
+    .eq("id", orderId);
+
+  if (error) {
+    return { success: false, error: "Failed to update chef override." };
+  }
+
+  return { success: true };
+}

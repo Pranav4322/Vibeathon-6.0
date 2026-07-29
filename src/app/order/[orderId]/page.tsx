@@ -24,7 +24,7 @@ const STATUS_STEPS = [
 ] as const;
 
 interface OrderItemWithMenuItem extends OrderItem {
-  menu_items: { name: string; is_veg: boolean } | null;
+  menu_items: { name: string; is_veg: boolean; course_category: string; prep_time_minutes: number | null } | null;
 }
 
 interface OrderWithRelations extends Order {
@@ -64,8 +64,8 @@ export default async function OrderPage({ params }: Props) {
   // Fetch menu item names for each order item
   const menuItemIds = baseItems.map((i) => i.menu_item_id);
   const { data: menuItemsRaw } = menuItemIds.length > 0
-    ? await supabase.from("menu_items").select("id, name, is_veg").in("id", menuItemIds)
-    : { data: [] as Array<{ id: string; name: string; is_veg: boolean }> };
+    ? await supabase.from("menu_items").select("id, name, is_veg, course_category, prep_time_minutes").in("id", menuItemIds)
+    : { data: [] as Array<{ id: string; name: string; is_veg: boolean; course_category: string; prep_time_minutes: number | null }> };
   const menuItemsMap = new Map((menuItemsRaw ?? []).map((m) => [m.id, m]));
 
   const orderItems: OrderItemWithMenuItem[] = baseItems.map((oi) => ({

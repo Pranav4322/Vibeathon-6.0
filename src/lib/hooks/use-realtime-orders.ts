@@ -4,10 +4,9 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Order, OrderItem, MenuItem, Table } from "@/lib/types/database";
 
-/** An order with its items and table info, used in the kitchen kanban */
 export interface KanbanOrder extends Order {
   table_number: string;
-  items: (OrderItem & { menu_item_name: string; is_veg: boolean })[];
+  items: (OrderItem & { menu_item_name: string; is_veg: boolean; course_category: string; prep_time_minutes: number | null })[];
   elapsed_minutes: number;
 }
 
@@ -51,8 +50,8 @@ export function useRealtimeOrders(restaurantId: string) {
     // Fetch menu item names
     const menuItemIds = [...new Set(allItems.map((i) => i.menu_item_id))];
     const { data: menuRaw } = menuItemIds.length > 0
-      ? await supabase.from("menu_items").select("id, name, is_veg").in("id", menuItemIds)
-      : { data: [] as Array<{ id: string; name: string; is_veg: boolean }> };
+      ? await supabase.from("menu_items").select("id, name, is_veg, course_category, prep_time_minutes").in("id", menuItemIds)
+      : { data: [] as Array<{ id: string; name: string; is_veg: boolean; course_category: string; prep_time_minutes: number | null }> };
     const menuMap = new Map((menuRaw ?? []).map((m) => [m.id, m]));
 
     // Fetch table numbers
@@ -75,6 +74,8 @@ export function useRealtimeOrders(restaurantId: string) {
           ...i,
           menu_item_name: menuMap.get(i.menu_item_id)?.name ?? "Unknown",
           is_veg: menuMap.get(i.menu_item_id)?.is_veg ?? true,
+          course_category: menuMap.get(i.menu_item_id)?.course_category ?? "main",
+          prep_time_minutes: menuMap.get(i.menu_item_id)?.prep_time_minutes ?? null,
         })),
       elapsed_minutes: Math.floor((now - new Date(o.placed_at).getTime()) / 60000),
     }));

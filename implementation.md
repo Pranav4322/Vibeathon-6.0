@@ -870,6 +870,79 @@ This is the largest phase. We build the full staff dashboard with a sidebar layo
 
 ---
 
+## Round 2 Enhancements (Phase 17 - 23)
+
+### Phase 17 — Course-Based Kitchen Sequencing & Priority
+**Commit:** `feat: kitchen course sequencing and wait times`
+
+**What we do:**
+- **Course Segregation:** Update `menu_items` schema to add a `course_category` enum (starter, main, dessert, beverage).
+- **Kitchen Priorities:** Modify the kitchen kanban to visually group order items by course, indicating to the chef exactly what to prepare first (e.g., Starters before Mains).
+- **Dynamic Prep Times:** Calculate wait times based on the aggregation of `prep_time_minutes` of the items requested (handling parallel vs sequential prep logic).
+- **Custom Chef Overrides:** Allow chefs to manually override or extend the wait time for specific orders from their dashboard.
+- **Live User Wait Times:** Display these calculated, real-time wait estimates for each course on the customer's tracking screen.
+
+### Phase 18 — Add-to-Order (Continuous Ordering)
+**Commit:** `feat: continuous ordering`
+
+**Dependencies:** Relies on Phase 17 (`course_category`) for Course Timing, and Phase 10 (Billing) for Rolling Bill.
+
+**What we do:**
+- **Continuous Cart:** Allow customers to seamlessly append items to an *existing active order* without generating a completely new order ID. (e.g., ordering more naan or dessert halfway through the meal).
+- **Course Timing:** Enable customers to specify course timing (e.g., "Bring this as Starter" or "Bring as Main") when adding items to the active order.
+- **Rolling Bill:** Maintain a single rolling bill that accumulates all additions over the session, automatically grouped by table.
+
+### Phase 19 — Advanced Table & Reservation Management
+**Commit:** `feat: advanced reservations and modifiers`
+
+**Dependencies:** "Hold & Fire" pacing relies on Phase 17 (`course_category`). Pre-ordering relies on Phase 7 (Reservations).
+
+**What we do:**
+- **Pre-Ordering:** Implement pre-ordering for waitlisted customers, firing the order automatically when their status changes to `seated`.
+- **Hold & Fire Pacing:** Implement a "Hold & Fire" system, allowing waiters or customers to place an order but put the Main Course on "Hold", and then manually "Fire" it to the kitchen.
+- **Modifiers:** Add support for item modifiers (e.g., "Less Spicy", "Extra Cheese", "Jain") with dynamic pricing adjustments stored in a JSONB `modifiers` column on `order_items`.
+- **Bill Splitting:** Implement bill splitting functionality so customers at a table can easily split the final check by equal fractions or by items from their mobile devices.
+
+### Phase 20 — Ingredient-Level Inventory Management
+**Commit:** `feat: ingredient inventory tracking`
+
+**What we do:**
+- **Raw Ingredients Schema:** Create tables for `ingredients` and `recipe_ingredients` (mapping menu items to their raw ingredients and quantities).
+- **Auto-Deduction:** Automatically deduct raw ingredient quantities from the inventory when an order moves to the "preparing" or "served" state.
+- **Low Stock Alerts:** Alert the chef/manager when specific raw ingredients (e.g., tomatoes, paneer) fall below a defined threshold.
+- *Note: Moved up in priority to provide the necessary data schema for displaying dish ingredients in the menu.*
+
+### Phase 21 — Menu Enhancements (Ingredients & Multi-Language)
+**Commit:** `feat: dish ingredients and i18n`
+
+**Dependencies:** "View Ingredients" strictly relies on the `ingredients` and `recipe_ingredients` tables created in Phase 20.
+
+**What we do:**
+- **View Ingredients & Allergens:** Add an "Ingredients / Allergens" section to the menu items so customers can tap a dish to see exactly what goes into it, dynamically fetched from the recipe schema.
+- **Multi-Language Support (i18n):** Implement internationalization, allowing customers to view the menu and interface in multiple languages (e.g., English, Hindi, Spanish).
+
+### Phase 22 — Post-Dining Feedback System
+**Commit:** `feat: customer feedback system`
+
+**Dependencies:** Triggers immediately after Phase 10 (Billing).
+
+**What we do:**
+- **Feedback Prompt:** Trigger a clean, mobile-friendly feedback modal immediately after the bill is paid.
+- **Ratings & Reviews:** Collect star ratings for food, service, and ambiance, along with an optional text review.
+- **Staff Dashboard Integration:** Display aggregated feedback scores and recent reviews on the restaurant manager's dashboard.
+
+### Phase 23 — Customer Messaging & AI Upselling (SMS/WhatsApp)
+**Commit:** `feat: customer messaging and upselling`
+
+**Dependencies:** AI Upselling relies on course sequencing from Phase 17.
+
+**What we do:**
+- **Out-of-App Notifications:** Integrate Twilio or a similar service to send SMS/WhatsApp updates for order status, queue position, or table readiness, because customers won't keep the website open indefinitely.
+- **AI Upselling via Message:** Use Gemini AI to analyze the customer's current order and send a smart, timely text recommendation (e.g., "Looks like you just finished your Starters! Would you like to add some Gulab Jamun for dessert? Reply 'YES' to add to your order.")
+- *Note: This sits as the final priority as it requires external 3rd-party API integrations and approvals.*
+
+---
+
 ## Verification Strategy
 
 | Phase | Verification |

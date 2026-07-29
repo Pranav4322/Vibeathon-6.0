@@ -20,7 +20,7 @@ interface OrderItemWithMenuItem {
   id: string;
   quantity: number;
   subtotal: number;
-  menu_items: { name: string; is_veg: boolean } | null;
+  menu_items: { name: string; is_veg: boolean; course_category: string; prep_time_minutes: number | null } | null;
 }
 
 interface OrderTrackingClientProps {
@@ -180,6 +180,18 @@ export function OrderTrackingClient({ initialOrder, tableData, orderItems }: Ord
               {order.status === "billed" && "Hope you had a great meal! See you next time. 👋"}
             </span>
           </div>
+          {(order.status === "placed" || order.status === "confirmed" || order.status === "preparing") && (
+            <div className="mt-2 text-xs text-amber-600/80 font-semibold">
+              {(() => {
+                const totalPrepTime = orderItems.reduce((acc, item) => acc + (item.menu_items?.prep_time_minutes || 0), 0);
+                const override = order.chef_override_minutes || 0;
+                // For a more realistic estimate, maybe max prep time of any item + some buffer, but let's just sum for now or max + 5
+                const maxPrepTime = Math.max(...orderItems.map(item => item.menu_items?.prep_time_minutes || 0), 0);
+                const estimatedWait = maxPrepTime > 0 ? maxPrepTime + 5 + override : 20 + override;
+                return `Estimated Wait: ~${estimatedWait} min`;
+              })()}
+            </div>
+          )}
         </div>
       </main>
     </div>

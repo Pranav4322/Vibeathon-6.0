@@ -31,6 +31,8 @@ export type StaffRole = "admin" | "manager" | "chef" | "waiter";
 
 export type ReservationStatus = "waiting" | "seated" | "cancelled" | "completed";
 
+export type CourseCategory = "starter" | "main" | "dessert" | "beverage";
+
 // ========================
 // Row Types (what you get from a SELECT)
 // ========================
@@ -63,6 +65,7 @@ export interface MenuItem {
   availability_status: AvailabilityStatus;
   is_veg: boolean;
   prep_time_minutes: number | null;
+  course_category: CourseCategory;
   created_at: string;
 }
 
@@ -102,6 +105,7 @@ export interface Order {
   ready_at: string | null;
   served_at: string | null;
   billed_at: string | null;
+  chef_override_minutes: number | null;
 }
 
 export interface OrderItem {
@@ -160,6 +164,7 @@ export interface MenuItemInsert {
   availability_status?: AvailabilityStatus;
   is_veg?: boolean;
   prep_time_minutes?: number | null;
+  course_category?: CourseCategory;
   created_at?: string;
 }
 
@@ -199,6 +204,7 @@ export interface OrderInsert {
   ready_at?: string | null;
   served_at?: string | null;
   billed_at?: string | null;
+  chef_override_minutes?: number | null;
 }
 
 export interface OrderItemInsert {
@@ -319,6 +325,7 @@ export interface Database {
       table_status: TableStatus;
       staff_role: StaffRole;
       reservation_status: ReservationStatus;
+      course_category: CourseCategory;
     };
   };
 }
@@ -336,7 +343,7 @@ export interface MenuItemWithCategory extends MenuItem {
 export interface OrderWithDetails extends Order {
   table: Pick<Table, "id" | "table_number" | "capacity">;
   order_items: (OrderItem & {
-    menu_item: Pick<MenuItem, "id" | "name" | "is_veg" | "image_url">;
+    menu_item: Pick<MenuItem, "id" | "name" | "is_veg" | "image_url" | "course_category">;
   })[];
 }
 

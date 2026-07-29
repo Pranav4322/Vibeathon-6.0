@@ -1,8 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { Clock, ChevronRight, Utensils } from "lucide-react";
-import { advanceOrderStatus } from "@/lib/actions/order-actions";
+import { Clock, ChevronRight, Utensils, Plus } from "lucide-react";
+import { advanceOrderStatus, updateChefOverride } from "@/lib/actions/order-actions";
 import type { KanbanOrder } from "@/lib/hooks/use-realtime-orders";
 import type { OrderStatus } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
@@ -44,6 +44,14 @@ export function OrderCard({ order, onAdvanced }: OrderCardProps) {
     });
   }
 
+  function handleOverride(minutes: number) {
+    startTransition(async () => {
+      const currentOverride = order.chef_override_minutes || 0;
+      await updateChefOverride(order.id, currentOverride + minutes);
+      onAdvanced?.();
+    });
+  }
+
   const isNew = order.elapsed_minutes <= 1;
 
   return (
@@ -73,6 +81,16 @@ export function OrderCard({ order, onAdvanced }: OrderCardProps) {
           )}>
             {order.elapsed_minutes}m
           </span>
+          {(order.status === "confirmed" || order.status === "preparing") && (
+            <button
+              onClick={() => handleOverride(5)}
+              disabled={isPending}
+              className="ml-1 flex items-center justify-center p-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
+              title="Add 5 min to wait time"
+            >
+              <Plus size={10} />5m
+            </button>
+          )}
         </div>
       </div>
 
@@ -89,27 +107,34 @@ export function OrderCard({ order, onAdvanced }: OrderCardProps) {
         </div>
       </div>
 
-      {/* Items list */}
-      <div className="space-y-1.5">
-        {order.items.slice(0, 4).map((item) => (
-          <div key={item.id} className="flex items-center gap-2">
-            <div
-              className={cn(
-                "w-2.5 h-2.5 rounded-sm border flex items-center justify-center",
-                item.is_veg ? "border-green-500" : "border-red-500"
-              )}
-            >
-              <div className={cn("w-1 h-1 rounded-full", item.is_veg ? "bg-green-500" : "bg-red-500")} />
+      {/* Items list grouped by course */}
+      <div className="space-y-3">
+        {(['starter', 'main', 'dessert', 'beverage'] as const).map(course => {
+          const courseItems = order.items.filter(item => item.course_category === course);
+          if (courseItems.length === 0) return null;
+          
+          return (
+            <div key={course} className="space-y-1.5">
+              <h4 className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                {course}s
+              </h4>
+              {courseItems.map((item) => (
+                <div key={item.id} className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      "w-2.5 h-2.5 rounded-sm border flex items-center justify-center",
+                      item.is_veg ? "border-green-500" : "border-red-500"
+                    )}
+                  >
+                    <div className={cn("w-1 h-1 rounded-full", item.is_veg ? "bg-green-500" : "bg-red-500")} />
+                  </div>
+                  <span className="text-xs text-slate-300 flex-1 truncate">{item.menu_item_name}</span>
+                  <span className="text-xs text-slate-500 font-medium">×{item.quantity}</span>
+                </div>
+              ))}
             </div>
-            <span className="text-xs text-slate-300 flex-1 truncate">{item.menu_item_name}</span>
-            <span className="text-xs text-slate-500 font-medium">×{item.quantity}</span>
-          </div>
-        ))}
-        {order.items.length > 4 && (
-          <p className="text-[10px] text-slate-500 pl-4">
-            +{order.items.length - 4} more items
-          </p>
-        )}
+          );
+        })}
       </div>
 
       {/* Special instructions */}
