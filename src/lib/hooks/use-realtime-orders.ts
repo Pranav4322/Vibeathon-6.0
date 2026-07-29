@@ -74,7 +74,7 @@ export function useRealtimeOrders(restaurantId: string) {
           ...i,
           menu_item_name: menuMap.get(i.menu_item_id)?.name ?? "Unknown",
           is_veg: menuMap.get(i.menu_item_id)?.is_veg ?? true,
-          course_category: menuMap.get(i.menu_item_id)?.course_category ?? "main",
+          course_category: i.course_override ?? menuMap.get(i.menu_item_id)?.course_category ?? "main",
           prep_time_minutes: menuMap.get(i.menu_item_id)?.prep_time_minutes ?? null,
         })),
       elapsed_minutes: Math.floor((now - new Date(o.placed_at).getTime()) / 60000),

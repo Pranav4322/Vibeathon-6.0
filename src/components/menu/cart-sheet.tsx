@@ -16,6 +16,7 @@ import { useCart } from "@/lib/hooks/use-cart";
 import { createRawClient } from "@/lib/supabase/raw-client";
 import { useAIUpsell } from "@/lib/hooks/use-ai-upsell";
 import { AIUpsellCard } from "./ai-upsell-card";
+import type { CourseCategory } from "@/lib/types/database";
 
 interface CartSheetProps {
   open: boolean;
@@ -25,7 +26,7 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartSheetProps) {
-  const { items, addItem, updateQuantity, removeItem, totalAmount, totalItems, clearCart, specialInstructions, setSpecialInstructions } = useCart();
+  const { items, addItem, updateQuantity, removeItem, totalAmount, totalItems, clearCart, specialInstructions, setSpecialInstructions, updateCourseOverride } = useCart();
   const { recommendation, isLoading: isUpsellLoading, setRecommendation } = useAIUpsell(open, items, restaurantId);
   const [isPlacing, startPlacing] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -55,31 +56,60 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
           0
         );
 
-        // Insert order
-        const { data: order, error: orderErr } = await supabase
+        // Check for active order
+        const { data: activeOrders } = await supabase
           .from("orders")
-          .insert({
-            restaurant_id: restaurantId,
-            table_id: tableData.id,
-            status: "placed",
-            special_instructions: specialInstructions || null,
-            total_amount: totalAmt,
-          })
-          .select("id")
-          .single();
+          .select("id, total_amount, special_instructions")
+          .eq("restaurant_id", restaurantId)
+          .eq("table_id", tableData.id)
+          .neq("status", "billed")
+          .limit(1);
 
-        if (orderErr || !order) {
-          setError("Failed to place order. Please try again.");
-          return;
+        let orderId = "";
+
+        if (activeOrders && activeOrders.length > 0) {
+          // Append to existing order
+          orderId = activeOrders[0].id;
+          const newTotal = Number(activeOrders[0].total_amount) + totalAmt;
+          const currentInstructions = activeOrders[0].special_instructions || "";
+          const newInstructions = specialInstructions 
+            ? (currentInstructions ? `${currentInstructions} | ${specialInstructions}` : specialInstructions) 
+            : currentInstructions;
+          
+          await supabase
+            .from("orders")
+            .update({ total_amount: newTotal, special_instructions: newInstructions || null })
+            .eq("id", orderId);
+            
+        } else {
+          // Insert new order
+          const { data: order, error: orderErr } = await supabase
+            .from("orders")
+            .insert({
+              restaurant_id: restaurantId,
+              table_id: tableData.id,
+              status: "placed",
+              special_instructions: specialInstructions || null,
+              total_amount: totalAmt,
+            })
+            .select("id")
+            .single();
+
+          if (orderErr || !order) {
+            setError("Failed to place order. Please try again.");
+            return;
+          }
+          orderId = order.id;
         }
 
         // Insert order items
         const orderItems = items.map((i) => ({
-          order_id: order.id,
+          order_id: orderId,
           menu_item_id: i.menuItem.id,
           quantity: i.quantity,
           unit_price: i.menuItem.price,
           subtotal: i.menuItem.price * i.quantity,
+          course_override: i.courseOverride || null,
         }));
 
         const { error: itemsErr } = await supabase
@@ -99,7 +129,7 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
 
         clearCart();
         onClose();
-        router.push(`/order/${order.id}`);
+        router.push(`/order/${orderId}`);
       } catch {
         setError("Something went wrong. Please try again.");
       }
@@ -148,6 +178,18 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
                       ₹{(item.menuItem.price * item.quantity).toFixed(0)}
                     </span>
                   </p>
+                  <div className="mt-1.5">
+                    <select
+                      value={item.courseOverride || item.menuItem.course_category}
+                      onChange={(e) => updateCourseOverride(item.menuItem.id, e.target.value as CourseCategory)}
+                      className="text-[10px] uppercase font-bold text-slate-500 bg-stone-100 border-none rounded px-2 py-1 outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer"
+                    >
+                      <option value="starter">Bring as Starter</option>
+                      <option value="main">Bring as Main</option>
+                      <option value="dessert">Bring as Dessert</option>
+                      <option value="beverage">Bring as Beverage</option>
+                    </select>
+                  </div>
                 </div>
 
                 {/* Controls */}

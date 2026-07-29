@@ -2,11 +2,12 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { MenuItem } from "@/lib/types/database";
+import type { MenuItem, CourseCategory } from "@/lib/types/database";
 
 export interface CartItem {
   menuItem: MenuItem;
   quantity: number;
+  courseOverride?: CourseCategory;
 }
 
 interface CartStore {
@@ -20,6 +21,7 @@ interface CartStore {
   addItem: (menuItem: MenuItem) => void;
   removeItem: (menuItemId: string) => void;
   updateQuantity: (menuItemId: string, quantity: number) => void;
+  updateCourseOverride: (menuItemId: string, course: CourseCategory) => void;
   setSpecialInstructions: (text: string) => void;
   clearCart: () => void;
 
@@ -68,6 +70,14 @@ export const useCart = create<CartStore>()(
         set({
           items: get().items.map((i) =>
             i.menuItem.id === menuItemId ? { ...i, quantity } : i
+          ),
+        });
+      },
+
+      updateCourseOverride: (menuItemId, course) => {
+        set({
+          items: get().items.map((i) =>
+            i.menuItem.id === menuItemId ? { ...i, courseOverride: course } : i
           ),
         });
       },

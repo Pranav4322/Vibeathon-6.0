@@ -116,6 +116,7 @@ export interface OrderItem {
   unit_price: number;
   subtotal: number;
   notes: string | null;
+  course_override: CourseCategory | null;
 }
 
 export interface Reservation {
@@ -215,6 +216,7 @@ export interface OrderItemInsert {
   unit_price: number;
   subtotal: number;
   notes?: string | null;
+  course_override?: CourseCategory | null;
 }
 
 export interface ReservationInsert {
