@@ -7,7 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { OtpInput } from "@/components/auth/otp-input";
+import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -16,6 +17,9 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [method, setMethod] = useState<"password" | "otp">("password");
+  const [step, setStep] = useState<"form" | "otp_verify">("form");
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,6 +47,62 @@ export function LoginForm() {
     router.refresh();
   };
 
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+      },
+    });
+
+    if (otpError) {
+      setError(otpError.message);
+      setIsLoading(false);
+      return;
+    }
+
+    setStep("otp_verify");
+    setIsLoading(false);
+  };
+
+  const handleVerifyOtp = async (otp: string) => {
+    setIsVerifying(true);
+    setError(null);
+
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email,
+      token: otp,
+      type: "email",
+    });
+
+    if (verifyError) {
+      setError(verifyError.message);
+      setIsVerifying(false);
+      return;
+    }
+
+    router.push(redirectTo);
+    router.refresh();
+  };
+
+  const handleResendOtp = async () => {
+    setError(null);
+    const { error: resendError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+      },
+    });
+
+    if (resendError) {
+      setError(resendError.message);
+    }
+  };
+
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
     setError(null);
@@ -60,8 +120,62 @@ export function LoginForm() {
     }
   };
 
+  // --- OTP Verification Step ---
+  if (step === "otp_verify") {
+    return (
+      <div className="space-y-6">
+        <button
+          onClick={() => setStep("form")}
+          className="flex items-center gap-1 text-sm text-slate-400 transition-colors hover:text-slate-200"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back
+        </button>
+
+        <div className="space-y-2 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/10">
+            <Mail className="h-6 w-6 text-amber-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-white">
+            Check your email
+          </h3>
+          <p className="text-sm text-slate-400">
+            We sent a 6-digit code to{" "}
+            <span className="font-medium text-slate-200">{email}</span>
+          </p>
+        </div>
+
+        {error && (
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
+        <OtpInput onComplete={handleVerifyOtp} disabled={isVerifying} />
+
+        {isVerifying && (
+          <div className="flex items-center justify-center gap-2 text-sm text-slate-400">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Verifying…
+          </div>
+        )}
+
+        <p className="text-center text-sm text-slate-400">
+          Didn&apos;t receive the code?{" "}
+          <button
+            type="button"
+            onClick={handleResendOtp}
+            className="font-medium text-amber-400 transition-colors hover:text-amber-300"
+          >
+            Resend
+          </button>
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <form onSubmit={handleEmailLogin} className="space-y-5">
+    <form onSubmit={method === "password" ? handleEmailLogin : handleSendOtp} className="space-y-5">
       {/* Error display */}
       {error && (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300 animate-in fade-in slide-in-from-top-1">
@@ -97,43 +211,45 @@ export function LoginForm() {
       </div>
 
       {/* Password */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label
-            htmlFor="password"
-            className="text-sm font-medium text-slate-300"
-          >
-            Password
-          </Label>
-          {/* Forgot password is nice-to-have but keeping the UI clean */}
+      {method === "password" && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label
+              htmlFor="password"
+              className="text-sm font-medium text-slate-300"
+            >
+              Password
+            </Label>
+            {/* Forgot password is nice-to-have but keeping the UI clean */}
+          </div>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              disabled={isLoading}
+              className="h-11 border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/30"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition-colors hover:text-slate-300"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-          <Input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            disabled={isLoading}
-            className="h-11 border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-slate-500 focus:border-amber-500 focus:ring-amber-500/30"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition-colors hover:text-slate-300"
-            tabIndex={-1}
-          >
-            {showPassword ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Submit */}
       <Button
@@ -144,12 +260,25 @@ export function LoginForm() {
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Signing in…
+            {method === "password" ? "Signing in…" : "Sending OTP…"}
           </>
-        ) : (
+        ) : method === "password" ? (
           "Sign In"
+        ) : (
+          "Send OTP"
         )}
       </Button>
+
+      {/* Method Switch */}
+      <div className="flex justify-center">
+        <button
+          type="button"
+          onClick={() => setMethod(method === "password" ? "otp" : "password")}
+          className="text-sm font-medium text-amber-400 transition-colors hover:text-amber-300"
+        >
+          {method === "password" ? "Sign in with OTP instead" : "Sign in with Password instead"}
+        </button>
+      </div>
 
       {/* Divider */}
       <div className="relative flex items-center py-1">
