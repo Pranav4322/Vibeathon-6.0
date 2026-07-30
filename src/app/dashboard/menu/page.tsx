@@ -39,11 +39,15 @@ export default async function StaffMenuPage() {
     .eq("restaurant_id", restaurant.id)
     .order("created_at", { ascending: true });
 
+  const uniqueMenuItems = Array.from(
+    new Map(menuItems?.map((item) => [item.name, item])).values()
+  );
+
   return (
     <StaffMenuClient
       restaurant={restaurant}
       categories={(categories ?? []) as Category[]}
-      menuItems={(menuItems ?? []) as MenuItem[]}
+      menuItems={uniqueMenuItems as MenuItem[]}
     />
   );
 }

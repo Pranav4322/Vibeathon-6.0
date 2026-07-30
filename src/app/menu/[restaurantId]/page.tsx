@@ -43,12 +43,16 @@ export default async function MenuPage({ params, searchParams }: Props) {
     .eq("restaurant_id", restaurantId)
     .order("created_at", { ascending: true });
 
+  const uniqueMenuItems = Array.from(
+    new Map(menuItems?.map((item) => [item.name, item])).values()
+  );
+
   return (
     <LanguageProvider>
       <MenuClientView
         restaurant={restaurant}
         categories={categories ?? []}
-        menuItems={menuItems ?? []}
+        menuItems={uniqueMenuItems}
         tableNumber={tableNumber}
       />
     </LanguageProvider>
