@@ -7,7 +7,7 @@ export async function updatePrepTime(menuItemId: string, prepTimeMinutes: number
 
   const { error } = await supabase
     .from("menu_items")
-    .update({ prep_time_minutes: prepTimeMinutes })
+    .update({ prep_time_minutes: prepTimeMinutes } as never)
     .eq("id", menuItemId);
 
   if (error) {
@@ -23,7 +23,7 @@ export async function updateAllPrepTimes(restaurantId: string, prepTimeMinutes: 
 
   const { error } = await supabase
     .from("menu_items")
-    .update({ prep_time_minutes: prepTimeMinutes })
+    .update({ prep_time_minutes: prepTimeMinutes } as never)
     .eq("restaurant_id", restaurantId);
 
   if (error) {
