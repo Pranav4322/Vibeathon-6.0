@@ -532,7 +532,6 @@ export default function Home() {
                 display: "inline-block",
               }}
             />
-            Powered by Gemini AI
           </span>
 
           <h1
