@@ -1,11 +1,10 @@
 # 🍽️ Our Solution: The Smart Restaurant OS
 
-**Team Name:** [Insert Team Name Here]  
-**Hosted Application Link:** [Insert Hosted Link Here]
+**Team Name:** harshy1909  
+**Hosted Application Link:** https://vibeathon-6-0.vercel.app/
 
 A full-stack, real-time restaurant management platform that digitizes the in-restaurant experience end-to-end. From AI-driven customer ordering to real-time kitchen Kanban boards and automated inventory tracking, Our Solution is the ultimate "Operating System" for modern dine-in restaurants.
 
-> **Note to Judges:** This is **NOT** a food delivery app. This is a comprehensive B2B2C system built specifically to solve physical dine-in restaurant operations.
 
 ---
 
@@ -25,24 +24,23 @@ Our Solution bridges the gap between the customer, the kitchen, and management t
 ## ✨ Key Features
 
 ### 📱 For the Customer (Front-of-House)
-* **QR-Based Table Ordering:** Scan a code to instantly view the menu and place orders—no waiting for a waiter.
-* **Smart Digital Menu:** Rich menu items featuring dietary labels (Veg/Non-Veg) and comprehensive **Allergen warnings**.
-* **AI-Powered Upselling:** Google Gemini analyzes the cart and suggests complementary dishes (e.g., "Add a Garlic Naan for your Butter Chicken") to boost AOV (Average Order Value).
-* **Course Overrides & "Hold" Actions:** Customers can instruct the kitchen to bring an item as a starter or "Hold" a dish until they are ready.
-* **Frictionless Auth:** Passwordless Sign-In via Email OTP/Magic Link and Google OAuth.
-* **Pre-Ordering:** Customers can pre-order food alongside their table reservation.
+* **Smart Digital Menu:** Mobile-first, interactive menu with category filtering and a responsive real-time cart.
+* **Live Order Tracking:** Customers can track their order status in real-time (Placed → Confirmed → Preparing → Ready → Served) with visual progress indicators.
+* **Frictionless Auth:** Secure sign-in via Email OTP and Google OAuth.
+* **Background Push Notifications:** Customers receive native push notifications for order updates (e.g., when the order is confirmed or ready), even if the browser is closed or running in the background.
 * **Post-Dining Feedback:** Automated rating and feedback collection once the bill is settled.
 
 ### 🍳 For the Kitchen & Staff (Back-of-House)
-* **Real-time Kanban Dashboard:** Orders instantly flow through a strict state machine: `Placed → Confirmed → Preparing → Ready → Served → Billed`.
-* **Push Notifications:** Web Push API and Service Workers notify staff instantly when new orders are placed or assistance is requested.
-* **Secure Staff Actions:** Sensitive actions (like billing or voids) require a secure Staff PIN.
-* **Live Table Management:** Visual map of table statuses (Free, Occupied, Reserved) with real-time wait tracking.
+* **Real-Time Kanban Dashboard:** Orders instantly flow through a strict state machine, keeping the kitchen perfectly synced.
+* **Staff Management Dashboard:** Comprehensive view of active orders, menu availability.
+* **Table Wait-Time Alerts:** Automated visual warnings for tables exceeding average service times to ensure prompt service.
+* **Push Notifications:** Staff receive push notifications for new orders and updates.
+* **Seamless Billing:** Automated bill generation with tax (GST) calculation and print-ready formatting.
 
-### 📊 For Management (Operations)
-* **Automated Inventory & Ingredient Tracking:** When a dish moves to "Preparing", the system automatically deducts raw ingredients from the inventory in real-time.
-* **Gemini Ops Assistant:** A conversational AI agent for managers. Ask natural language questions like *"What sold best last night?"* or *"Which tables are running long?"*
-* **Multi-Tenant Architecture:** Built from day one to support multiple restaurant branches (`restaurant_id` sharding).
+### 📊 For Management (Operations & AI)
+* **Gemini Demand Forecasting:** AI analyzes historical order data to predict dish demand and suggest prep quantities for upcoming services.
+* **Gemini Ops Assistant:** A conversational AI agent for managers to ask natural language questions (e.g., *"What sold best last night?"* or *"Which tables are running long?"*).
+* **Multi-Tenant Architecture:** Built from day one to support multiple restaurant branches.
 
 ---
 
