@@ -151,11 +151,6 @@ export default function Home() {
       <main className="mx-auto flex max-w-7xl flex-col px-4 pb-16 pt-8 sm:px-8 sm:pb-20 sm:pt-10 lg:px-10 lg:pt-20">
         <section className="grid items-center gap-8 sm:gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
           <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-700">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 rail-pulse" />
-              Powered by Gemini AI
-            </div>
-
             <h1 className="max-w-3xl text-3.5rem leading-[1.05] font-bold tracking-tight sm:text-5xl lg:text-6xl">
               The future of <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">dine-in</span> restaurant operations.
             </h1>
