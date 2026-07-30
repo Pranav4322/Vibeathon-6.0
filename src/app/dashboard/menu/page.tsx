@@ -40,7 +40,7 @@ export default async function StaffMenuPage() {
     .order("created_at", { ascending: true });
 
   const uniqueMenuItems = Array.from(
-    new Map(menuItems?.map((item) => [item.name, item])).values()
+    new Map((menuItems as any[])?.map((item) => [item.name, item])).values()
   );
 
   return (
