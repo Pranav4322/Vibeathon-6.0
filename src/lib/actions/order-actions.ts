@@ -2,6 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { OrderStatus } from "@/lib/types/database";
+import { sendPushNotificationToOrder } from "./push-actions";
+import { generateUpsellForOrder } from "@/lib/ai/upsell-generator";
 
 /**
  * Valid state machine transitions for orders.
@@ -109,6 +111,47 @@ export async function advanceOrderStatus(
           .eq("id", fullOrder.table_id);
       }
     }
+  }
+
+  // Trigger push notifications
+  try {
+    if (nextStatus === "confirmed") {
+      await sendPushNotificationToOrder(orderId, {
+        title: "Order Confirmed!",
+        body: "We've told the kitchen to make it extra delicious.",
+        url: `/order/${orderId}`
+      });
+    } else if (nextStatus === "preparing") {
+      await sendPushNotificationToOrder(orderId, {
+        title: "Chef is on it 🍳",
+        body: "Your food is being prepared right now.",
+        url: `/order/${orderId}`
+      });
+    } else if (nextStatus === "ready") {
+      await sendPushNotificationToOrder(orderId, {
+        title: "Food is Ready! 🛎️",
+        body: "Your order is ready to be served.",
+        url: `/order/${orderId}`
+      });
+    } else if (nextStatus === "served") {
+      // Generate AI Upsell when served
+      const upsellMsg = await generateUpsellForOrder(orderId);
+      if (upsellMsg) {
+        await sendPushNotificationToOrder(orderId, {
+          title: "Enjoying your meal? 🍰",
+          body: upsellMsg,
+          url: `/order/${orderId}`
+        });
+      } else {
+        await sendPushNotificationToOrder(orderId, {
+          title: "Food is Served! 🍽️",
+          body: "Enjoy your meal!",
+          url: `/order/${orderId}`
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Failed to send push notification on status change:", error);
   }
 
   return { success: true, newStatus: nextStatus };

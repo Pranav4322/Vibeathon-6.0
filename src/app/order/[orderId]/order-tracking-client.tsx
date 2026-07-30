@@ -7,6 +7,7 @@ import type { Order, OrderStatus, Table } from "@/lib/types/database";
 import { useNotifications } from "@/lib/hooks/use-notifications";
 import { GamifiedWaitCard } from "@/components/orders/gamified-wait";
 import { FeedbackForm } from "@/components/feedback/feedback-form";
+import { PushNotificationManager } from "@/components/push-notification-manager";
 
 const STATUS_STEPS = [
   { key: "placed",    label: "Placed",     icon: Receipt,     color: "text-blue-500",   bg: "bg-blue-50"   },
@@ -130,6 +131,15 @@ export function OrderTrackingClient({ initialOrder, tableData, orderItems, initi
               })}
             </div>
           </div>
+        </div>
+
+        {/* Push Notifications Opt-in */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-stone-800">Order Updates</h3>
+            <p className="text-xs text-stone-500">Get notified when your food is ready.</p>
+          </div>
+          <PushNotificationManager orderId={order.id} />
         </div>
 
         {/* Order items */}
