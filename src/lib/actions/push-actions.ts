@@ -22,7 +22,7 @@ export async function savePushSubscription(orderId: string, subscription: any) {
   if (!orderId || !subscription) return { success: false, error: "Missing data" };
 
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // We cast to 'any' because push_subscriptions isn't in database.ts yet
     const { error } = await (supabase as any).from("push_subscriptions").upsert(
@@ -52,7 +52,7 @@ export async function sendPushNotificationToOrder(
   payload: { title: string; body: string; url?: string; actions?: any[] }
 ) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get all subscriptions for this order
     const { data: subs, error } = await (supabase as any)

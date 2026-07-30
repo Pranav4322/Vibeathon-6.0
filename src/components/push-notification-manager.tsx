@@ -46,7 +46,7 @@ export function PushNotificationManager({ orderId }: { orderId: string }) {
       
       // If we already have a subscription locally, ensure backend has it
       if (sub && orderId) {
-        savePushSubscription(orderId, sub);
+        savePushSubscription(orderId, JSON.parse(JSON.stringify(sub)));
       }
     } catch (error) {
       console.error("Service Worker registration failed:", error);
@@ -68,11 +68,11 @@ export function PushNotificationManager({ orderId }: { orderId: string }) {
       });
       setSubscription(sub);
 
-      const res = await savePushSubscription(orderId, sub);
+      const res = await savePushSubscription(orderId, JSON.parse(JSON.stringify(sub)));
       if (res.success) {
         toast.success("Notifications enabled! We'll alert you when your order is ready.");
       } else {
-        toast.error("Failed to save subscription.");
+        toast.error("Failed to save subscription: " + res.error);
       }
     } catch (error: any) {
       console.error("Failed to subscribe:", error);
