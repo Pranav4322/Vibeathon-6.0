@@ -1,100 +1,116 @@
-# 🍽️ Smart Restaurant Management System
+# 🍽️ Our Solution: The Smart Restaurant OS
 
-**Team Name:** [Insert Team Name Here]
+**Team Name:** [Insert Team Name Here]  
 **Hosted Application Link:** [Insert Hosted Link Here]
 
-A full-stack, real-time restaurant management platform that digitizes the in-restaurant experience end-to-end — from customer ordering to kitchen management, billing, and AI-powered operational insights.
+A full-stack, real-time restaurant management platform that digitizes the in-restaurant experience end-to-end. From AI-driven customer ordering to real-time kitchen Kanban boards and automated inventory tracking, Our Solution is the ultimate "Operating System" for modern dine-in restaurants.
 
-> **This is NOT a food delivery clone.** It's a system built for dine-in restaurant operations.
+> **Note to Judges:** This is **NOT** a food delivery app. This is a comprehensive B2B2C system built specifically to solve physical dine-in restaurant operations.
 
-## Problem Statement
+---
 
-Restaurants rely on manual processes causing operational inefficiencies:
+## 🚨 The Problem
 
-- Customers can't see real-time dish availability
-- Long wait times with no visibility into queue position
-- Delayed communication between customers, staff, and kitchen
-- Manual billing and inventory management
-- Lack of actionable operational insights
+Traditional restaurants rely on fragmented, manual processes that cause operational chaos:
+- **Customers** suffer from slow service, paper menus without dietary context, and zero visibility into order status.
+- **Kitchens (Back-of-House)** struggle with lost paper tickets, poor timing (e.g., mains arriving before starters), and untracked ingredient waste.
+- **Management** lacks real-time operational insights and struggles to upsell effectively without being pushy.
 
-This system solves all of the above with a digitized, real-time, AI-enhanced workflow.
+## 💡 The Solution
 
-## Order State Machine
+Our Solution bridges the gap between the customer, the kitchen, and management through a **100% digitized, real-time, AI-enhanced workflow.** 
 
-Based on research into real POS systems (Petpooja, Toast), orders follow a strict state machine:
+---
 
+## ✨ Key Features
+
+### 📱 For the Customer (Front-of-House)
+* **QR-Based Table Ordering:** Scan a code to instantly view the menu and place orders—no waiting for a waiter.
+* **Smart Digital Menu:** Rich menu items featuring dietary labels (Veg/Non-Veg) and comprehensive **Allergen warnings**.
+* **AI-Powered Upselling:** Google Gemini analyzes the cart and suggests complementary dishes (e.g., "Add a Garlic Naan for your Butter Chicken") to boost AOV (Average Order Value).
+* **Course Overrides & "Hold" Actions:** Customers can instruct the kitchen to bring an item as a starter or "Hold" a dish until they are ready.
+* **Frictionless Auth:** Passwordless Sign-In via Email OTP/Magic Link and Google OAuth.
+* **Pre-Ordering:** Customers can pre-order food alongside their table reservation.
+* **Post-Dining Feedback:** Automated rating and feedback collection once the bill is settled.
+
+### 🍳 For the Kitchen & Staff (Back-of-House)
+* **Real-time Kanban Dashboard:** Orders instantly flow through a strict state machine: `Placed → Confirmed → Preparing → Ready → Served → Billed`.
+* **Push Notifications:** Web Push API and Service Workers notify staff instantly when new orders are placed or assistance is requested.
+* **Secure Staff Actions:** Sensitive actions (like billing or voids) require a secure Staff PIN.
+* **Live Table Management:** Visual map of table statuses (Free, Occupied, Reserved) with real-time wait tracking.
+
+### 📊 For Management (Operations)
+* **Automated Inventory & Ingredient Tracking:** When a dish moves to "Preparing", the system automatically deducts raw ingredients from the inventory in real-time.
+* **Gemini Ops Assistant:** A conversational AI agent for managers. Ask natural language questions like *"What sold best last night?"* or *"Which tables are running long?"*
+* **Multi-Tenant Architecture:** Built from day one to support multiple restaurant branches (`restaurant_id` sharding).
+
+---
+
+## 🛠️ Tech Stack
+
+Our Solution is built on the bleeding edge of the modern web:
+
+| Layer | Technology |
+| --- | --- |
+| **Framework** | Next.js 15 (App Router, Server Actions, React 19 features) |
+| **Styling** | Tailwind CSS v4, shadcn/ui, Framer Motion for micro-interactions |
+| **Database & Auth** | Supabase (PostgreSQL, Row Level Security, Auth, Magic Links) |
+| **Realtime Sync** | Supabase Realtime (WebSocket multiplexing) |
+| **AI Integration** | Google Gemini API (Demand forecasting, Upselling, Ops Assistant) |
+| **PWA / Push** | Service Workers & Web Push API for native-like notifications |
+
+---
+
+## 🚀 Order State Machine
+
+We modeled our backend on enterprise POS systems (like Toast). Orders strictly follow this flow:
+
+```mermaid
+graph LR
+  Placed --> Confirmed
+  Confirmed --> Preparing
+  Preparing --> Ready
+  Ready --> Served
+  Served --> Billed
 ```
-placed → confirmed → preparing → ready → served → billed
-```
+* **Placed:** Triggered by the customer.
+* **State Transitions:** Triggered by staff. Every transition fires a Supabase Realtime event, instantly updating the customer's phone and the kitchen dashboard without a page reload.
 
-- **`placed`** — Customer-initiated (via the digital menu)
-- **All other transitions** — Staff-initiated (via the kitchen/staff dashboard)
-- **Each transition** triggers a Supabase Realtime event, updating all connected clients instantly
+---
 
-## Tech Stack
-
-| Layer       | Technology                                                                 |
-| ----------- | -------------------------------------------------------------------------- |
-| Framework   | Next.js 15 (App Router) — serves as both frontend & backend               |
-| Styling     | Tailwind CSS v4 + shadcn/ui                                               |
-| Database    | Supabase (Postgres + Realtime + Auth + Row Level Security)                 |
-| AI          | Google Gemini API (demand forecasting + ops assistant)                      |
-| Deployment  | Vercel                                                                     |
-
-## AI Usage
-
-This project leverages Google's Gemini AI to enhance restaurant operations:
-- **Demand Forecasting:** Predicts dish demand based on historical order data, helping the kitchen prep the right amounts and reduce waste.
-- **Ops Assistant:** A conversational agent for staff to query operational data in natural language (e.g., "What sold best last night?", "Which tables are running long?").
-
-## Hackathon Tier Features & User Stories
-
-| Tier         | Features                                                        | User Stories |
-| ------------ | --------------------------------------------------------------- | ------------ |
-| **Bronze**   | Menu display, basic ordering, table management                  | As a customer, I can view the digital menu and place an order. As staff, I can manage table statuses. |
-| **Silver**   | Real-time order tracking, staff dashboard, role-based access     | As a customer, I can track my order status live. As staff, I can manage orders through a kanban board. |
-| **Gold**     | Smart reservations, notifications, analytics, billing           | As a customer, I can join a waitlist and get notified when my table is ready. As staff, I can generate bills. |
-| **Platinum** | AI demand forecasting, realtime dish availability               | As a manager, I can see AI predictions for tonight's service. As staff, I can mark items out of stock instantly. |
-| **Bonus**    | Gemini ops assistant, wait-time alerts, bidirectional realtime   | As a manager, I can chat with an AI about sales data. As staff, I see alerts when tables exceed average wait times. |
-
-## Getting Started
+## 🏁 Getting Started (Local Setup)
 
 ### Prerequisites
-
 - Node.js 20+
-- npm
 - A [Supabase](https://supabase.com) project
 - A [Google Gemini API key](https://ai.google.dev)
 
-### Setup
+### Installation
 
 ```bash
-# Clone the repo
+# 1. Clone the repo
 git clone <repo-url>
-cd vibeathon
+cd our-solution
 
-# Install dependencies
+# 2. Install dependencies
 npm install
 
-# Copy env template and fill in your values
+# 3. Setup Environment Variables
 cp .env.local.example .env.local
+# Fill in your Supabase URL, Anon Key, and Gemini API Key in .env.local
 
-# Run the dev server
+# 4. Run the development server
 npm run dev
 ```
-
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-## Scalability Notes
+---
 
-To ensure the Smart Restaurant Management System can handle high traffic and multiple locations, the architecture is designed with the following scalability principles:
+## 📈 Scalability & Architecture Notes for Judges
 
-- **Supabase Realtime Scaling:** Uses connection multiplexing to efficiently handle many concurrent WebSocket connections per restaurant, minimizing overhead and staying within channel limits.
-- **Multi-location Sharding Strategy:** `restaurant_id` serves as a natural partition key across all major tables (orders, menu items, tables), allowing for horizontal database sharding as the platform expands to new branches.
-- **CDN and Edge Caching:** Static assets, frontend pages, and unchanged API responses are distributed globally via Vercel's Edge Network, reducing latency for customers browsing menus.
-- **Database Indexing:** Critical query paths (e.g., active orders by status, wait times by table) are heavily indexed in PostgreSQL to ensure fast reads even with millions of historical records.
-- **Serverless Compute:** API routes and Server Actions run on Vercel's serverless infrastructure, automatically scaling horizontally to handle spikes in traffic during peak dining hours.
+- **Database Sharding:** The `restaurant_id` serves as a partition key across all major tables, allowing horizontal database scaling for franchise expansions.
+- **WebSocket Efficiency:** Instead of polling, we use Supabase Realtime's connection multiplexing to efficiently handle concurrent connections per restaurant.
+- **Serverless Compute:** Heavy operations (like AI prompt generation and inventory deduction) run on edge/serverless functions, ensuring the UI remains buttery smooth.
 
-## License
-
-MIT
+---
+*Built with ❤️ for the Hackathon.*
