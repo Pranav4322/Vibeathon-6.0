@@ -95,7 +95,12 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
           
           await supabase
             .from("orders")
-            .update({ total_amount: newTotal, special_instructions: newInstructions || null })
+            .update({ 
+              total_amount: newTotal, 
+              special_instructions: newInstructions || null,
+              status: "placed",
+              placed_at: new Date().toISOString()
+            })
             .eq("id", orderId);
             
         } else {
