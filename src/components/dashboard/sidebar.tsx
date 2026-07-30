@@ -26,15 +26,10 @@ import { useRouter } from "next/navigation";
 const navItems = [
   { name: "Home", href: "/dashboard", icon: LayoutDashboard },
   { name: "Orders", href: "/dashboard/orders", icon: ClipboardList },
-  { name: "Tables", href: "/dashboard/tables", icon: Grid2X2 },
   { name: "Menu", href: "/dashboard/menu", icon: MenuSquare },
   { name: "Reservations", href: "/dashboard/reservations", icon: Users },
   { name: "Inventory", href: "/dashboard/inventory", icon: Package },
-  { name: "Staff", href: "/dashboard/staff", icon: UserSquare2 },
   { name: "Billing", href: "/dashboard/billing", icon: Receipt },
-  { name: "Customers", href: "/dashboard/customers", icon: Users },
-  { name: "Sales", href: "/dashboard/sales", icon: BadgeDollarSign },
-  { name: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
   { name: "Feedback", href: "/dashboard/feedback", icon: Star },
   { name: "AI Assistant", href: "/dashboard/ai", icon: Bot },
 ];
