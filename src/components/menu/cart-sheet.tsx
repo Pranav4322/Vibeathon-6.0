@@ -41,6 +41,8 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
     setError(null);
     startPlacing(async () => {
       try {
+        console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+        console.log("Supabase Key:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 10) + "...");
         const supabase = createRawClient();
 
         // Check if pre-order (no table needed)
