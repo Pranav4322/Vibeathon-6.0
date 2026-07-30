@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { OrderTrackingClient } from "./order-tracking-client";
 import type { Metadata } from "next";
 import type { Order, OrderItem, Table } from "@/lib/types/database";
+import { hasFeedbackForOrder } from "@/lib/actions/feedback-actions";
 
 interface Props {
   params: Promise<{ orderId: string }>;
@@ -76,12 +77,14 @@ export default async function OrderPage({ params }: Props) {
     menu_items: menuItemsMap.get(oi.menu_item_id) ?? null,
   }));
   const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === order.status);
+  const initialHasFeedback = await hasFeedbackForOrder(orderId);
 
   return (
     <OrderTrackingClient
       initialOrder={order}
       tableData={tableData}
       orderItems={orderItems}
+      initialHasFeedback={initialHasFeedback}
     />
   );
 }

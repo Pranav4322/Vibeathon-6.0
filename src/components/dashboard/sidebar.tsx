@@ -16,6 +16,7 @@ import {
   LogOut,
   Receipt,
   Lock,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -34,6 +35,7 @@ const navItems = [
   { name: "Customers", href: "/dashboard/customers", icon: Users },
   { name: "Sales", href: "/dashboard/sales", icon: BadgeDollarSign },
   { name: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
+  { name: "Feedback", href: "/dashboard/feedback", icon: Star },
   { name: "AI Assistant", href: "/dashboard/ai", icon: Bot },
 ];
 

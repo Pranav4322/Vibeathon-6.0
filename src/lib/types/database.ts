@@ -158,6 +158,17 @@ export interface Reservation {
   created_at: string;
 }
 
+export interface Feedback {
+  id: string;
+  restaurant_id: string;
+  order_id: string;
+  food_rating: number;
+  service_rating: number;
+  ambiance_rating: number;
+  review_text: string | null;
+  created_at: string;
+}
+
 // ========================
 // Insert Types (what you send to an INSERT)
 // ========================
@@ -283,6 +294,17 @@ export interface ReservationInsert {
   created_at?: string;
 }
 
+export interface FeedbackInsert {
+  id?: string;
+  restaurant_id: string;
+  order_id: string;
+  food_rating: number;
+  service_rating: number;
+  ambiance_rating: number;
+  review_text?: string | null;
+  created_at?: string;
+}
+
 // ========================
 // Update Types (what you send to an UPDATE — all fields optional)
 // ========================
@@ -297,6 +319,7 @@ export type StaffUpdate = Partial<StaffInsert>;
 export type OrderUpdate = Partial<OrderInsert>;
 export type OrderItemUpdate = Partial<OrderItemInsert>;
 export type ReservationUpdate = Partial<ReservationInsert>;
+export type FeedbackUpdate = Partial<FeedbackInsert>;
 
 // ========================
 // Supabase Database Type (for createClient<Database> generic)
@@ -385,6 +408,15 @@ export interface Database {
         Update: ReservationUpdate;
         Relationships: [
           { foreignKeyName: "reservations_restaurant_id_fkey"; columns: ["restaurant_id"]; isOneToOne: false; referencedRelation: "restaurants"; referencedColumns: ["id"] }
+        ];
+      };
+      feedback: {
+        Row: Feedback;
+        Insert: FeedbackInsert;
+        Update: FeedbackUpdate;
+        Relationships: [
+          { foreignKeyName: "feedback_restaurant_id_fkey"; columns: ["restaurant_id"]; isOneToOne: false; referencedRelation: "restaurants"; referencedColumns: ["id"] },
+          { foreignKeyName: "feedback_order_id_fkey"; columns: ["order_id"]; isOneToOne: true; referencedRelation: "orders"; referencedColumns: ["id"] }
         ];
       };
     };

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Order, OrderStatus, Table } from "@/lib/types/database";
 import { useNotifications } from "@/lib/hooks/use-notifications";
 import { GamifiedWaitCard } from "@/components/orders/gamified-wait";
+import { FeedbackForm } from "@/components/feedback/feedback-form";
 
 const STATUS_STEPS = [
   { key: "placed",    label: "Placed",     icon: Receipt,     color: "text-blue-500",   bg: "bg-blue-50"   },
@@ -27,10 +28,12 @@ interface OrderTrackingClientProps {
   initialOrder: Order;
   tableData: Table | null;
   orderItems: OrderItemWithMenuItem[];
+  initialHasFeedback: boolean;
 }
 
-export function OrderTrackingClient({ initialOrder, tableData, orderItems }: OrderTrackingClientProps) {
+export function OrderTrackingClient({ initialOrder, tableData, orderItems, initialHasFeedback }: OrderTrackingClientProps) {
   const [order, setOrder] = useState<Order>(initialOrder);
+  const [hasFeedback, setHasFeedback] = useState(initialHasFeedback);
   useNotifications({ restaurantId: order.restaurant_id, orderId: order.id });
 
   useEffect(() => {
@@ -193,6 +196,15 @@ export function OrderTrackingClient({ initialOrder, tableData, orderItems }: Ord
             </div>
           )}
         </div>
+
+        {/* Feedback Form */}
+        {order.status === "billed" && !hasFeedback && (
+          <FeedbackForm
+            restaurantId={order.restaurant_id}
+            orderId={order.id}
+            onSuccess={() => setHasFeedback(true)}
+          />
+        )}
       </main>
     </div>
   );
