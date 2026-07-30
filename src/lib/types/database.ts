@@ -77,6 +77,7 @@ export interface Ingredient {
   unit: string;
   quantity_in_stock: number;
   low_stock_threshold: number;
+  allergens: string[];
   created_at: string;
   updated_at: string;
 }
@@ -201,6 +202,7 @@ export interface IngredientInsert {
   unit: string;
   quantity_in_stock?: number;
   low_stock_threshold?: number;
+  allergens?: string[];
   created_at?: string;
   updated_at?: string;
 }

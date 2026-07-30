@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 
 export async function updatePrepTime(menuItemId: string, prepTimeMinutes: number) {
-  const supabase: any = await createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("menu_items")
@@ -19,7 +19,7 @@ export async function updatePrepTime(menuItemId: string, prepTimeMinutes: number
 }
 
 export async function updateAllPrepTimes(restaurantId: string, prepTimeMinutes: number) {
-  const supabase: any = await createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("menu_items")
@@ -32,4 +32,28 @@ export async function updateAllPrepTimes(restaurantId: string, prepTimeMinutes: 
   }
 
   return { success: true };
+}
+
+export async function getMenuItemIngredients(menuItemId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("recipe_ingredients")
+    .select(`
+      quantity_required,
+      ingredient:ingredients (
+        id,
+        name,
+        unit,
+        allergens
+      )
+    `)
+    .eq("menu_item_id", menuItemId);
+
+  if (error) {
+    console.error("Failed to fetch menu item ingredients:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, data };
 }

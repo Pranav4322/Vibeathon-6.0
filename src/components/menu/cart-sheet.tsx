@@ -18,6 +18,7 @@ import { useAIUpsell } from "@/lib/hooks/use-ai-upsell";
 import { AIUpsellCard } from "./ai-upsell-card";
 import type { CourseCategory } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/language-context";
 
 interface CartSheetProps {
   open: boolean;
@@ -34,6 +35,7 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
   const router = useRouter();
   const searchParams = useSearchParams();
   const reservationId = searchParams.get("reservation");
+  const { t } = useTranslation();
 
   async function placeOrder() {
     setError(null);
@@ -177,10 +179,10 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
             </div>
             <div>
               <SheetTitle className="text-lg font-bold text-stone-800">
-                Your Order
+                {t("title", "cart")}
               </SheetTitle>
               <p className="text-xs text-stone-500">
-                {reservationId ? "Pre-order" : `Table ${tableNumber}`} · {totalItems()} item{totalItems() !== 1 ? "s" : ""}
+                {reservationId ? "Pre-order" : `${t("tableNum", "cart")} ${tableNumber}`} · {totalItems()} item{totalItems() !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
@@ -286,7 +288,7 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
               <textarea
                 value={specialInstructions}
                 onChange={(e) => setSpecialInstructions(e.target.value)}
-                placeholder="Any allergies, preferences, or requests..."
+                placeholder={t("instructionsPlaceholder", "cart")}
                 rows={2}
                 className="w-full mt-2 px-3 py-2 text-sm bg-stone-50 border border-stone-200 rounded-xl outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 resize-none transition-all"
               />
@@ -296,10 +298,9 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
 
         {/* Bill summary + CTA */}
         <SheetFooter className="flex-col px-5 pt-3 pb-6 border-t border-stone-100 gap-3">
-          {/* Bill breakdown */}
           <div className="w-full space-y-1.5 text-sm">
             <div className="flex justify-between text-stone-500">
-              <span>Subtotal</span>
+              <span>{t("subtotal", "cart")}</span>
               <span>₹{total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-stone-500">
@@ -330,7 +331,7 @@ export function CartSheet({ open, onClose, tableNumber, restaurantId }: CartShee
               </>
             ) : (
               <>
-                Place Order · ₹{grandTotal.toFixed(2)}
+                {t("checkout", "cart")} · ₹{grandTotal.toFixed(2)}
                 <ChevronRight size={16} className="ml-1" />
               </>
             )}

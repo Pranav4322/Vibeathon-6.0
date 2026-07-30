@@ -9,6 +9,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useCart } from "@/lib/hooks/use-cart";
 import type { Restaurant, Category, MenuItem } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/language-context";
+import { LanguageSwitcher } from "@/components/menu/language-switcher";
 
 interface MenuClientViewProps {
   restaurant: Restaurant;
@@ -26,6 +28,7 @@ export function MenuClientView({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const { totalItems, setContext } = useCart();
+  const { t } = useTranslation();
 
   // Set cart context once on mount
   useEffect(() => {
@@ -54,12 +57,15 @@ export function MenuClientView({
               </h1>
               <div className="flex items-center gap-1 text-xs text-stone-500">
                 <MapPin size={10} />
-                <span>Table {tableNumber}</span>
+                <span>{t("table")} {tableNumber}</span>
               </div>
             </div>
           </div>
 
-          {/* Cart button */}
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+
+            {/* Cart button */}
           <button
             onClick={() => setCartOpen(true)}
             className={cn(
@@ -74,13 +80,14 @@ export function MenuClientView({
             {cartCount > 0 && (
               <span className="font-bold">{cartCount}</span>
             )}
-            {cartCount === 0 && <span>Cart</span>}
+            {cartCount === 0 && <span>{t("cart")}</span>}
 
             {/* Pulse ring */}
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-ping opacity-75" />
             )}
           </button>
+          </div>
         </div>
       </header>
 
@@ -95,8 +102,8 @@ export function MenuClientView({
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-5">
         {filteredItems.length === 0 ? (
           <EmptyState
-            title="No Items Found"
-            description="There are no items in this category right now. Check back later!"
+            title={t("noItemsTitle")}
+            description={t("noItemsDesc")}
             icon={<span className="text-4xl">🍽️</span>}
             className="py-12 border-none"
           />
@@ -121,7 +128,7 @@ export function MenuClientView({
                 <span className="bg-white/20 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
                   {cartCount}
                 </span>
-                <span>View Cart</span>
+                <span>{t("viewCart")}</span>
               </div>
               <ShoppingBag size={18} />
             </button>

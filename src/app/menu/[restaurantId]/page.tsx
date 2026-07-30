@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { MenuClientView } from "./menu-client-view";
+import { LanguageProvider } from "@/lib/i18n/language-context";
 
 interface Props {
   params: Promise<{ restaurantId: string }>;
@@ -43,11 +44,13 @@ export default async function MenuPage({ params, searchParams }: Props) {
     .order("created_at", { ascending: true });
 
   return (
-    <MenuClientView
-      restaurant={restaurant}
-      categories={categories ?? []}
-      menuItems={menuItems ?? []}
-      tableNumber={tableNumber}
-    />
+    <LanguageProvider>
+      <MenuClientView
+        restaurant={restaurant}
+        categories={categories ?? []}
+        menuItems={menuItems ?? []}
+        tableNumber={tableNumber}
+      />
+    </LanguageProvider>
   );
 }

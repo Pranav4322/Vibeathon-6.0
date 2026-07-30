@@ -4,11 +4,13 @@ import Image from "next/image";
 import { Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { QuantitySelector } from "./quantity-selector";
-import { useCart } from "@/lib/hooks/use-cart";
-import type { MenuItem } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { MenuItemDialog } from "./menu-item-dialog";
+import { useTranslation } from "@/lib/i18n/language-context";
+import { useCart } from "@/lib/hooks/use-cart";
+import type { MenuItem } from "@/lib/types/database";
 
 interface MenuCardProps {
   item: MenuItem;
@@ -23,6 +25,7 @@ export function MenuCard({ item }: MenuCardProps) {
 
   // Phase 19: Modifiers state
   const [selectedModifiers, setSelectedModifiers] = useState<{name: string, price: number}[]>([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (quantity > 0 && isOut) {
@@ -35,6 +38,8 @@ export function MenuCard({ item }: MenuCardProps) {
     }
   }, [isOut, quantity, item.name, item.id, removeItem, cartEntries]);
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   return (
     <div
       className={cn(
@@ -42,8 +47,12 @@ export function MenuCard({ item }: MenuCardProps) {
         isOut && "opacity-60"
       )}
     >
-      {/* Image area */}
-      <div className="relative w-full aspect-[4/3] bg-amber-50 overflow-hidden">
+      <div 
+        className="cursor-pointer"
+        onClick={() => setDialogOpen(true)}
+      >
+        {/* Image area */}
+        <div className="relative w-full aspect-[4/3] bg-amber-50 overflow-hidden">
         {item.image_url ? (
           <Image
             src={item.image_url}
@@ -64,7 +73,7 @@ export function MenuCard({ item }: MenuCardProps) {
         {isOut && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-              Out of Stock
+              {t("outOfStock")}
             </span>
           </div>
         )}
@@ -73,7 +82,7 @@ export function MenuCard({ item }: MenuCardProps) {
         {isLow && !isOut && (
           <div className="absolute top-2 left-2">
             <span className="bg-amber-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-              Limited
+              {t("limited")}
             </span>
           </div>
         )}
@@ -104,7 +113,10 @@ export function MenuCard({ item }: MenuCardProps) {
             </p>
           )}
         </div>
+      </div>
+      </div> {/* Close cursor-pointer div */}
 
+      <div className="flex flex-col gap-2 px-3 pb-3">
         <div className="flex items-center justify-between">
           <div>
             <span className="text-base font-bold text-stone-800">
@@ -113,7 +125,7 @@ export function MenuCard({ item }: MenuCardProps) {
             {item.prep_time_minutes && (
               <div className="flex items-center gap-1 text-[11px] text-stone-400 mt-0.5">
                 <Clock size={10} />
-                <span>{item.prep_time_minutes} min</span>
+                <span>{item.prep_time_minutes} {t("min")}</span>
               </div>
             )}
           </div>
@@ -141,7 +153,7 @@ export function MenuCard({ item }: MenuCardProps) {
         {/* Phase 19: Modifiers UI */}
         {item.available_modifiers && item.available_modifiers.length > 0 && (
           <div className="mt-3 pt-3 border-t border-stone-100">
-            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">Customize (applies to next add)</p>
+            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">{t("customize")}</p>
             <div className="flex flex-wrap gap-2">
               {item.available_modifiers.map((mod) => {
                 const isSelected = selectedModifiers.some(m => m.name === mod.name);
@@ -168,6 +180,12 @@ export function MenuCard({ item }: MenuCardProps) {
           </div>
         )}
       </div>
+
+      <MenuItemDialog 
+        item={item} 
+        isOpen={dialogOpen} 
+        onClose={() => setDialogOpen(false)} 
+      />
     </div>
   );
 }
